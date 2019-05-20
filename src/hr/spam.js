@@ -87,11 +87,11 @@ room.onPlayerChat = function(player, message) {
   let interval = room.pluginSpec.config.interval;
   let minTime = currentTime - interval;
   let updatedBuffer = buffer.filter((t) => t > minTime);
+  messageBuffers.set(player.id, updatedBuffer);
 
   // check that the buffer has not reached its limits
   let maxBuffer = room.pluginSpec.config.maxBuffer;
   let warnBuffer = room.pluginSpec.config.warnBuffer;
   if (updatedBuffer.length > maxBuffer) banPlayer(player);
   else if (updatedBuffer.length > warnBuffer) warnPlayer(player);
-  messageBuffers.set(player.id, updatedBuffer);
 }
