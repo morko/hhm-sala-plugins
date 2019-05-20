@@ -15,11 +15,11 @@ room.pluginSpec = {
     // How many messages within the interval before player is warned.
     warnBuffer: 3,
     // How many messages within the interval before player is banned.
-    maxBuffer: 5,
+    maxBuffer: 4,
     // How many similar messages before player is warned.
     warnSimilar: 2,
     // How many similar messages before player is banned.
-    maxSimilar: 4,
+    maxSimilar: 3,
     // Message to send when warning player for spamming.
     warningMessage: `STOP SPAMMING`,
     // Message to send when player gets banned for spamming.
