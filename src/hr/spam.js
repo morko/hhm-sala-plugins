@@ -20,9 +20,9 @@ room.pluginSpec = {
     warnSimilar: 2,
     // How many similar messages before player is banned.
     maxSimilar: 4,
-    // Message to send when warnBuffer fills.
+    // Message to send when warning player for spamming.
     warningMessage: `STOP SPAMMING`,
-    // Message to attach in the ban message when maxBuffer fills.
+    // Message to send when player gets banned for spamming.
     banMessage: `SPAM`
   },
   order: {
