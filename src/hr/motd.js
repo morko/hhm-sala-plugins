@@ -26,7 +26,7 @@ room.onPlayerJoin = function onPlayerJoin(player) {
 }
 
 function displayMessageOnceIn(interval, message) {
-  room[`onCron${mins}Minutes`] = () => room.sendChat(message);
+  room[`onCron${interval}Minutes`] = () => room.sendChat(message);
 }
 
 room.onCommand0_motd = (player) => {
