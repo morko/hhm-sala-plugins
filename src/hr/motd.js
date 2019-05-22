@@ -12,8 +12,8 @@ room.pluginSpec = {
   version: `1.0.0`,
   config: {
     // Message Of The Day.
-    motd: `Join https://discord.gg/TeJAEWu for support.`,
-    // How often to display the motd in minutes.
+    message: `Join https://discord.gg/TeJAEWu for support.`,
+    // How often to display the message in minutes.
     // Set to 0 to disable displaying it repeatedly.
     interval: 10
   },
@@ -21,13 +21,13 @@ room.pluginSpec = {
 };
 
 room.onPlayerJoin = function(player) {
-  const motd = room.pluginSpec.config.motd;
-  room.sendChat(motd, player.id);
+  const message = room.pluginSpec.config.message;
+  room.sendChat(message, player.id);
 }
 
 if (room.pluginSpec.config.interval > 0) {
   displayMessageOnceIn(
-    room.pluginSpec.config.motd,
+    room.pluginSpec.config.message,
     room.pluginSpec.config.interval
   );
 }
