@@ -20,33 +20,35 @@ room.pluginSpec = {
   dependencies: [`sav/cron`]
 };
 
-room.onPlayerJoin = function(player) {
-  const message = room.pluginSpec.config.message;
+room.onPlayerJoin = function onPlayerJoin(player) {
+  const message = room.getConfig('message');
   room.sendChat(message, player.id);
 }
 
-if (room.pluginSpec.config.interval > 0) {
-  displayMessageOnceIn(
-    room.pluginSpec.config.interval,
-    room.pluginSpec.config.message
-  );
-}
-
 function displayMessageOnceIn(interval, message) {
-  room[`onCron${interval}Minutes`] = () => room.sendChat(message + interval);
+  room[`onCron${mins}Minutes`] = () => room.sendChat(message);
 }
 
 room.onCommand0_motd = (player) => {
-  const message = room.pluginSpec.config.message;
+  const message = room.getConfig('message');
   room.sendChat(message, player.id);
 }
 
 room.onConfigSet = ({paramName, newValue, oldValue}) => {
   if (paramName === `interval`) {
     // TODO: remove this when https://github.com/saviola777/haxball-headless-manager/issues/14 solved
-    if (!oldValue) oldValue = room.pluginSpec.config.interval;
-    const message = room.pluginSpec.config.message;
+    if (!oldValue) oldValue = room.getConfig('interval')
+    const message = room.getConfig('message');
     delete room[`onCron${oldValue}Minutes`];
     displayMessageOnceIn(newValue, message);
+  }
+}
+
+room.onRoomLink = function onRoomLink() {
+  if (parseInt(room.getConfig('interval')) > 0) {
+    displayMessageOnceIn(
+      room.pluginSpec.config.interval,
+      room.pluginSpec.config.message
+    );
   }
 }
