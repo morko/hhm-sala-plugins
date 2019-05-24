@@ -20,7 +20,7 @@ room.pluginSpec = {
   dependencies: [`sav/cron`]
 };
 
-room.onPlayerJoin = function onPlayerJoin(player) {
+function onPlayerJoin(player) {
   const message = room.getConfig('message');
   room.sendChat(message, player.id);
 }
@@ -45,6 +45,7 @@ room.onConfigSet = ({paramName, newValue, oldValue}) => {
 }
 
 room.onRoomLink = function onRoomLink() {
+  room.onPlayerJoin = onPlayerJoin;
   if (parseInt(room.getConfig('interval')) > 0) {
     displayMessageOnceIn(
       room.pluginSpec.config.interval,

@@ -46,17 +46,17 @@ function banPlayer(player) {
   room.kickPlayer(player.id, banMessage, true);
 }
 
-room.onPlayerJoin = function(player) {
+function onPlayerJoin(player) {
   messageBuffers.set(player.id, []);
   similarMessages.set(player.id, { counter: 0, message: ''});
 }
 
-room.onPlayerLeave = function(player) {
+function onPlayerLeave(player) {
   messageBuffers.delete(player.id);
   similarMessages.delete(player.id);
 }
 
-room.onPlayerChat = function(player, message) {
+function onPlayerChat(player, message) {
   // make sure the player has the needed Maps to keep track of stuff
   if (!messageBuffers.has(player.id)) messageBuffers.set(player.id, []);
   if (!similarMessages.has(player.id)) {
@@ -107,4 +107,10 @@ room.onPlayerChat = function(player, message) {
   }
   messageBuffers.set(player.id, updatedBuffer);
 
+}
+
+room.onRoomLink = function onRoomLink() {
+  room.onPlayerJoin = onPlayerJoin;
+  room.onPlayerChat = onPlayerChat;
+  room.onPlayerLeave = onPlayerLeave;
 }

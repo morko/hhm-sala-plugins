@@ -62,7 +62,7 @@ function isPlayerProtected(playerId) {
   return false;
 }
 
-room.onPlayerKicked = function onPlayerKicked(bannedPlayer, reason, ban, byPlayer) {
+function onPlayerKicked(bannedPlayer, reason, ban, byPlayer) {
   if (!ban) return;
   if (byPlayer.id === 0) return;
   
@@ -81,5 +81,9 @@ room.onPlayerKicked = function onPlayerKicked(bannedPlayer, reason, ban, byPlaye
   } else if (allowOnlyProtectedRolesToBan && !bannerIsProtected) {
     room.kickPlayer(byPlayer.id, violationMessage, banTheBanners);
     room.clearBan(bannedPlayer.id);
+  }
+
+  room.onRoomLink = function onRoomLink() {
+    room.onPlayerKicked = onPlayerKicked;
   }
 }
