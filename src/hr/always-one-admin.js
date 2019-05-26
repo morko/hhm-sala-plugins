@@ -27,7 +27,7 @@ function updateAdmins() {
   room.setPlayerAdmin(players[0].id, true); // Give admin to the first non admin player in the list
 }
 
-function onPlayerLeave(player) {
+function onPlayerJoin(player) {
   updateAdmins();
 }
 
@@ -37,5 +37,5 @@ function onPlayerLeave(player) {
 
 room.onRoomLink = function onRoomLink() {
   room.onPlayerLeave = onPlayerLeave;
-  room.onPlayerJoin = onPlayerLeave;
+  room.onPlayerJoin = onPlayerJoin;
 }
