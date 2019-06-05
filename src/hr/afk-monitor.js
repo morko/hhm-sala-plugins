@@ -98,17 +98,7 @@ function onPlayerLeave(player) {
 }
 
 function onGameStateChanged(state) {
-  switch (state) {
-    case GM.states.stopped:
-      refreshTimeouts();
-      break;
-    case GM.states.started:
-      refreshTimeouts();
-      break;
-    case GM.states.paused:
-      refreshTimeouts();
-      break;
-  }
+  refreshTimeouts();
 }
 
 function onPlayerActivity(player) {
@@ -239,8 +229,6 @@ function refreshTimeout(playerId) {
   maxIdleTimeInMs = maxIdleTime * 1000;
   maxIdleTimeInMs -= currentTime - lastActiveTime;
   let timeToWarn = maxIdleTimeInMs - (room.getConfig('warnBefore') * 1000);
-
-  console.log(`${player.id} is getting kicked in ${maxIdleTimeInMs / 1000}`);
 
   removeTimeout(player.id);
 
