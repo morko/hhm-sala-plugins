@@ -26,7 +26,9 @@ function onPlayerJoin(player) {
 }
 
 function displayMessageOnceIn(interval, message) {
-  room[`onCron${interval}Minutes`] = () => room.sendChat(message);
+  if (parseInt(interval) > 0) {
+    room[`onCron${interval}Minutes`] = () => room.sendChat(message);
+  }
 }
 
 room.onCommand0_motd = (player) => {
@@ -35,21 +37,20 @@ room.onCommand0_motd = (player) => {
 }
 
 room.onConfigSet = ({paramName, newValue, oldValue}) => {
+
   if (paramName === `interval`) {
-    // TODO: remove this when https://github.com/saviola777/haxball-headless-manager/issues/14 solved
-    if (!oldValue) oldValue = room.getConfig('interval')
     const message = room.getConfig('message');
-    delete room[`onCron${oldValue}Minutes`];
+    if (oldValue) delete room[`onCron${oldValue}Minutes`];
     displayMessageOnceIn(newValue, message);
+
+  } else if (paramName === `message`) {
+    const interval = room.getConfig('interval');
+    delete room[`onCron${interval}Minutes`];
+    displayMessageOnceIn(interval, newValue);
   }
 }
 
 room.onRoomLink = function onRoomLink() {
   room.onPlayerJoin = onPlayerJoin;
-  if (parseInt(room.getConfig('interval')) > 0) {
-    displayMessageOnceIn(
-      room.pluginSpec.config.interval,
-      room.pluginSpec.config.message
-    );
-  }
+  displayMessageOnceIn(room.getConfig('interval'), room.getConfig('message'));
 }
