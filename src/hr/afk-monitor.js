@@ -80,7 +80,7 @@ function onPlayerAdminChange(changedPlayer, byPlayer) {
 }
 
 function onPlayerTeamChange(changedPlayer, byPlayer) {
-  if (byPlayer) onAdminActivity(byPlayer);
+  if (byPlayer && byPlayer.admin) onAdminActivity(byPlayer);
   refreshTimeout(changedPlayer.id);
 }
 
