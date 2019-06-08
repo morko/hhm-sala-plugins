@@ -46,8 +46,6 @@ function onStadiumChange(newMapName, byPlayer) {
   }
 }
 
-function onGameSettingsChange(s)
-
 room.onRoomLink = function onRoomLink() {
   room.setDefaultStadium(room.getConfig('defaultMap'));
   room.setTeamsLock(room.getConfig('lockTeams'));
