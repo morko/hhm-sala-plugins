@@ -1,6 +1,6 @@
 /**
- * This plugin for Headless Haxball Manager (HHM) makes it more easy to keep
- * track of the current game state. All times are in seconds!
+ * This plugin for Headless Haxball Manager (HHM) monitors the player
+ * activity and kicks the players that idle too long.
  */
 let room = HBInit();
 room.pluginSpec = {
