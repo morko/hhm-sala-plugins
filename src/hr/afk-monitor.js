@@ -35,8 +35,6 @@ room.pluginSpec = {
 
 const debug = (msg) => { console.debug(`hr/afk-monitor: ${msg}`)};
 
-const gameState = room.getPlugin('sav/game-state');
-
 let afkTimeouts = new Map();
 let warnAfkTimeouts = new Map();
 let lastActiveTimes = new Map();
@@ -214,6 +212,8 @@ function refreshTimeout(playerId) {
   let adminsOnly = room.getConfig('adminsOnly');
   if (adminsOnly && !player.admin) return;
 
+  const gameState = room.getPlugin('sav/game-state');
+  
   let maxIdleTime = 0;
   let currentTime = Date.now();
   let lastActiveTime = lastActiveTimes.get(player.id);
