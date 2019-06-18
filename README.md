@@ -162,3 +162,21 @@ too long.
   kickMessage: 'AFK'
 }
 ```
+
+## hr/pause
+
+This plugin enables players to pause the game by writing `p` in chat. 
+It can also pause the game if a player leaves when game has started.
+
+### Configuration
+
+```js
+'hr/pause': {
+  // If true, then game is paused if playing player leaves.
+  pauseWhenPlayerLeaves: true,
+  // If true, players are allowed to pause the game by writing 'p'.
+  allowPlayersToPause: true,
+  // How many times player can pause game (0 is unlimited).
+  maxPauseTimes: 1,
+}
+```
