@@ -2,10 +2,50 @@
 
 Repository of plugins for Headless Haxball Manager.
 
+This repository offers folowing plugins:
+- [hr/afk-monitor](#hr/hrafk-monitor)
+- [hr/always-one-admin](#hr/hralways-one-admin)
+- [hr/ban-protection](#hr/hrban-protection)
+- [hr/game-mode](#hr/hrgame-mode)
+- [hr/motd](#hr/hrmotd)
+- [hr/pause](#hr/hrpause)
+- [hr/spam](#hr/hrspam)
+
 # Plugins
 
 This section describes what plugins there are available in this repository and
 what kind of configuration options they support.
+
+## hr/afk-monitor
+
+This plugin for monitors the player activity and kicks the players that idle
+too long.
+
+### Configuration
+
+```js
+// All times in the config are in seconds.
+'hr/afk-monitor': {
+  // If true, then only admins will be monitored.
+  adminsOnly: true,
+  // Max time player can be afk.
+  maxIdleTime: 5 * 60,
+  // Max time player can be AFK when he is playing.
+  maxIdleTimeWhenPlaying: 15,
+  // Max time player can be AFK when he is playing and game is paused.
+  maxIdleTimeWhenPaused: 30,
+  // Max time admins can be AFK when game is paused before all of them 
+  // getting kicked.
+  maxAdminIdleTimeWhenPaused: 15,
+  // Max time admins can be AFK when game is stopped before all of them 
+  // getting kicked.
+  maxAdminIdleTimeWhenStopped: 20,
+  // How many seconds beforehand to warn the player before getting kicked.
+  warnBefore: 7,
+  // Message to send to player when he is kicked.
+  kickMessage: 'AFK'
+}
+```
 
 ## hr/always-one-admin
 
@@ -105,6 +145,24 @@ Depends on `sav/cron` of the default HHM plugin repository.
 }
 ```
 
+## hr/pause
+
+This plugin enables players to pause the game by writing `p` in chat. 
+It can also pause the game if a player leaves when game has started.
+
+### Configuration
+
+```js
+'hr/pause': {
+  // If true, then game is paused if playing player leaves.
+  pauseWhenPlayerLeaves: true,
+  // If true, players are allowed to pause the game by writing 'p'.
+  allowPlayersToPause: true,
+  // How many times player can pause game (0 is unlimited).
+  maxPauseTimes: 1,
+}
+```
+
 ## hr/spam
 
 This plugin provides spam protection. It prevents spamming similar messages
@@ -130,53 +188,4 @@ and flooding the chat.
   // Message to send when player gets banned for spamming.
   banMessage: `SPAM`
 },
-```
-
-## hr/afk-monitor
-
-This plugin for monitors the player activity and kicks the players that idle
-too long.
-
-### Configuration
-
-```js
-// All times in the config are in seconds.
-'hr/afk-monitor': {
-  // If true, then only admins will be monitored.
-  adminsOnly: true,
-  // Max time player can be afk.
-  maxIdleTime: 5 * 60,
-  // Max time player can be AFK when he is playing.
-  maxIdleTimeWhenPlaying: 15,
-  // Max time player can be AFK when he is playing and game is paused.
-  maxIdleTimeWhenPaused: 30,
-  // Max time admins can be AFK when game is paused before all of them 
-  // getting kicked.
-  maxAdminIdleTimeWhenPaused: 15,
-  // Max time admins can be AFK when game is stopped before all of them 
-  // getting kicked.
-  maxAdminIdleTimeWhenStopped: 20,
-  // How many seconds beforehand to warn the player before getting kicked.
-  warnBefore: 7,
-  // Message to send to player when he is kicked.
-  kickMessage: 'AFK'
-}
-```
-
-## hr/pause
-
-This plugin enables players to pause the game by writing `p` in chat. 
-It can also pause the game if a player leaves when game has started.
-
-### Configuration
-
-```js
-'hr/pause': {
-  // If true, then game is paused if playing player leaves.
-  pauseWhenPlayerLeaves: true,
-  // If true, players are allowed to pause the game by writing 'p'.
-  allowPlayersToPause: true,
-  // How many times player can pause game (0 is unlimited).
-  maxPauseTimes: 1,
-}
 ```
