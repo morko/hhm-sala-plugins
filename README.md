@@ -80,7 +80,7 @@ The default map names in HaxBall are `Classic`, `Easy`, `Small`, `Big`,
   // Sets the time limit on room start. Does not enforce the setting.
   timeLimit: 3,
   // Sets the score limit on room start. Does not enforce the setting.
-  scorelimit: 3
+  scoreLimit: 3
 }
 ```
 
