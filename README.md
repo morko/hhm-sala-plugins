@@ -3,13 +3,13 @@
 Repository of plugins for Headless Haxball Manager.
 
 This repository offers folowing plugins:
-- [hr/afk-monitor](#hr/hrafk-monitor)
-- [hr/always-one-admin](#hr/hralways-one-admin)
-- [hr/ban-protection](#hr/hrban-protection)
-- [hr/game-mode](#hr/hrgame-mode)
-- [hr/motd](#hr/hrmotd)
-- [hr/pause](#hr/hrpause)
-- [hr/spam](#hr/hrspam)
+- [hr/afk-monitor](#hrafk-monitor)
+- [hr/always-one-admin](#hralways-one-admin)
+- [hr/ban-protection](#hrban-protection)
+- [hr/game-mode](#hrgame-mode)
+- [hr/motd](#hrmotd)
+- [hr/pause](#hrpause)
+- [hr/spam](#hrspam)
 
 # Plugins
 
