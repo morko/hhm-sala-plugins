@@ -105,7 +105,7 @@ function onGameUnpause(player) {
 }
 
 function onPlayerKicked(kickedPlayer, reason, ban, byPlayer) {
-  if (byPlayer && byPlayer.id !== 0) {
+  if (byPlayer && byPlayer.id !== kickedPlayer.id && byPlayer.id !== 0) {
     onAdminActivity(byPlayer);
   }
 }
