@@ -28,22 +28,18 @@ too long.
 'hr/afk-monitor': {
   // If true, then only admins will be monitored.
   adminsOnly: true,
-  // Max time player can be afk.
+  // Max time player can be AFK.
   maxIdleTime: 5 * 60,
   // Max time player can be AFK when he is playing.
-  maxIdleTimeWhenPlaying: 15,
-  // Max time player can be AFK when he is playing and game is paused.
-  maxIdleTimeWhenPaused: 30,
-  // Max time admins can be AFK when game is paused before all of them 
-  // getting kicked.
-  maxAdminIdleTimeWhenPaused: 15,
-  // Max time admins can be AFK when game is stopped before all of them 
-  // getting kicked.
-  maxAdminIdleTimeWhenStopped: 20,
+  maxIdleTimeWhenPlaying: 20,
+  // Max time admins can be AFK when they are required to take action.
+  maxAdminIdleTime: 20,
   // How many seconds beforehand to warn the player before getting kicked.
   warnBefore: 7,
   // Message to send to player when he is kicked.
-  kickMessage: 'AFK'
+  kickMessage: 'AFK',
+  // Enables debugging messages to console (use only if developing).
+  debug: false
 }
 ```
 

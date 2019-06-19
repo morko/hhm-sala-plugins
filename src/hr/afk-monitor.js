@@ -9,155 +9,136 @@ room.pluginSpec = {
   version: `1.0.0`,
   dependencies: [
     `sav/game-state`,
+    `sav/cron`
   ],
   // All times in the config are in seconds.
   config: {
     // If true, then only admins will be monitored.
     adminsOnly: true,
-    // Max time player can be afk.
+    // Max time player can be AFK.
     maxIdleTime: 5 * 60,
     // Max time player can be AFK when he is playing.
-    maxIdleTimeWhenPlaying: 15,
-    // Max time player can be AFK when he is playing and game is paused.
-    maxIdleTimeWhenPaused: 30,
-    // Max time admins can be AFK when game is paused before all of them 
-    // getting kicked.
-    maxAdminIdleTimeWhenPaused: 15,
-    // Max time admins can be AFK when game is stopped before all of them 
-    // getting kicked.
-    maxAdminIdleTimeWhenStopped: 20,
+    maxIdleTimeWhenPlaying: 20,
+    // Max time admins can be AFK when they are required to take action.
+    maxAdminIdleTime: 20,
     // How many seconds beforehand to warn the player before getting kicked.
     warnBefore: 7,
     // Message to send to player when he is kicked.
-    kickMessage: 'AFK'
+    kickMessage: 'AFK',
+    // Enables debugging messages to console (use only if developing).
+    debug: false
   }
 };
 
-const debug = (msg) => { console.debug(`hr/afk-monitor: ${msg}`)};
+const debug = room.getConfig('debug') 
+  ? (msg) => { console.debug(`hr/afk-monitor: ${msg}`)} 
+  : () => {};
 
 let afkTimeouts = new Map();
 let warnAfkTimeouts = new Map();
 let lastActiveTimes = new Map();
+let lastAdminActivityTime = 0;
 
-// Count player chatting as an activity too.
+let gameStates;
+
 function onPlayerChat(player) {
   onPlayerActivity(player);
 }
 
-// Set the initial timers when player joins.
 function onPlayerJoin(player) {
-  let adminsOnly = room.getConfig('adminsOnly');
-  if (!adminsOnly) {
-    refreshLastActiveTime(player.id);
-    refreshTimeout(player.id);
-  }
+  refreshLastActiveTime(player);
+
+  let gameState = room.getPlugin('sav/game-state').getGameState();
+  refreshTimeout(player, gameState);
 }
 
-// When players admin status changes, update the timeouts.
 function onPlayerAdminChange(changedPlayer, byPlayer) {
-  if (byPlayer.id !== 0) {
-    onAdminActivity(byPlayer);
-  }
-  refreshTimeout(changedPlayer.id);
-  let adminsOnly = room.getConfig('adminsOnly');
-  if (adminsOnly && !changedPlayer.admin) {
-    removeLastActiveTime(changedPlayer.id);
-    removeTimeout(changedPlayer.id);
-  }
-}
+  let gameState = room.getPlugin('sav/game-state').getGameState();
 
-// When players team change, update the timeouts.
-function onPlayerTeamChange(changedPlayer, byPlayer) {
-  refreshTimeout(changedPlayer.id);
+  let players = room.getPlayerList().filter(p => p !== 0);
+  let admins = players.filter(p => p.admin);
+  if (players.length === 1 || admins.length > 1) {
+    lastAdminActivityTime = Date.now();
+  }
+
   if (byPlayer.id !== 0 && byPlayer.admin) {
-    onAdminActivity(byPlayer);
+    lastAdminActivityTime = Date.now();
+    refreshAllTimeouts(gameState);
+  } else {
+    refreshTimeout(changedPlayer, gameState);
+  }
+
+}
+
+function onPlayerTeamChange(changedPlayer, byPlayer) {  
+  let gameState = room.getPlugin('sav/game-state').getGameState();
+
+  if (byPlayer.id !== 0 && byPlayer.admin) {
+    lastAdminActivityTime = Date.now();
+    refreshAllTimeouts(gameState);
+  } else {
+    refreshLastActiveTime(byPlayer);
+    refreshTimeout(changedPlayer, gameState);
   }
 }
 
-// When player leaves, clear the timeouts.
+
+function onPlayerKicked(kickedPlayer, reason, ban, byPlayer) {
+  if (byPlayer && byPlayer.id !== kickedPlayer.id && byPlayer.id !== 0) {
+    let gameState = room.getPlugin('sav/game-state').getGameState();
+    lastAdminActivityTime = Date.now();
+    refreshAllTimeouts(gameState);
+  }
+}
+
 function onPlayerLeave(player) {
-  removeLastActiveTime(player.id);
-  removeTimeout(player.id);
+  removeLastActiveTime(player);
+  removeTimeout(player);
 }
 
 function onGameStart(player) {
   if (player.id !== 0) {
-    onAdminActivity(player);
+    lastAdminActivityTime = Date.now();
   }
+  refreshAllTimeouts(gameStates.STARTED);
 }
 
 function onGameStop(player) {
   if (player && player.id !== 0) {
-    onAdminActivity(player);
+    lastAdminActivityTime = Date.now();
   }
+  refreshAllTimeouts(gameStates.STOPPED);
 }
 
 function onGamePause(player) {
   if (player.id !== 0) {
-    onAdminActivity(player);
+    lastAdminActivityTime = Date.now();
   }
+  refreshAllTimeouts(gameStates.PAUSED);
 }
 
 function onGameUnpause(player) {
   if (player.id !== 0) {
-    onAdminActivity(player);
+    lastAdminActivityTime = Date.now();
   }
+  refreshAllTimeouts(gameStates.STARTED);
 }
 
-function onPlayerKicked(kickedPlayer, reason, ban, byPlayer) {
-  if (byPlayer && byPlayer.id !== kickedPlayer.id && byPlayer.id !== 0) {
-    onAdminActivity(byPlayer);
-  }
-}
-
-// When the game state changes, update all timeouts.
-function onGameStateChanged(state) {
-  refreshAllTimeouts();
-}
-
-// Whenever the player does something, update the time that he was last active
-// and update the timeouts.
 function onPlayerActivity(player) {
   if (player.id === 0) return;
-  refreshLastActiveTime(player.id);
-  refreshTimeout(player.id);
-}
-
-// Whenever an admin does something, update the time that he was last active
-// and update the timeouts.
-function onAdminActivity(player) {
-  if (player.id === 0) return;
-  refreshLastActiveTime(player.id);
-  refreshTimeout(player.id);
-}
-
-/**
- * Returns an array of player ids in the room.
- */
-function getPlayerIds() {
-  return room.getPlayerList().filter((p) => p.id !== 0).map((p) => p.id);
-}
-
-/**
- * Returns an array of admin ids in the room.
- */
-function getAdminIds() {
-  return room.getPlayerList()
-    .filter((p) => p.id !== 0 && p.admin)
-    .map((p) => p.id);
+  refreshLastActiveTime(player);
+  let gameState = room.getPlugin('sav/game-state').getGameState();
+  refreshTimeout(player, gameState);
 }
 
 /**
  * Updates the last active time of the player with given id to be the current
  * time.
  * 
- * @param {number} playerId - Id of the player.
+ * @param {number} player - Id of the player.
  */
-function refreshLastActiveTime(playerId) {
-  let adminsOnly = room.getConfig('adminsOnly');
-  let player = room.getPlayer(playerId);
-  if (adminsOnly && !player.admin) return;
-  return lastActiveTimes.set(playerId, Date.now());
+function refreshLastActiveTime(player) {
+  return lastActiveTimes.set(player.id, Date.now());
 }
 
 /**
@@ -165,8 +146,8 @@ function refreshLastActiveTime(playerId) {
  * 
  * @param {number} playerId - Id of the player.
  */
-function removeLastActiveTime(playerId) {
-  return lastActiveTimes.delete(playerId);
+function removeLastActiveTime(player) {
+  return lastActiveTimes.delete(player.id);
 }
 
 /**
@@ -174,24 +155,27 @@ function removeLastActiveTime(playerId) {
  * 
  * @param {number} playerId - Id of the player.
  */
-function removeTimeout(playerId) {
-  let timeout = afkTimeouts.get(playerId);
+function removeTimeout(player) {
+  let timeout = afkTimeouts.get(player.id);
   if (timeout) clearTimeout(timeout);
-  timeout = warnAfkTimeouts.get(playerId);
+  timeout = warnAfkTimeouts.get(player.id);
   if (timeout) clearTimeout(timeout);
-  afkTimeouts.delete(playerId);
-  warnAfkTimeouts.delete(playerId);
+  afkTimeouts.delete(player.id);
+  warnAfkTimeouts.delete(player.id);
 }
 
 /**
  * Refreshes the warn and kick timeouts of all players in the room.
  */
-function refreshAllTimeouts() {
-  let adminsOnly = room.getConfig('adminsOnly');
-  const players = adminsOnly ? getAdminIds() : getPlayerIds();
-  for (let playerId of players) {
-    refreshTimeout(playerId);
+function refreshAllTimeouts(gameState) {
+  const players = room.getPlayerList().filter((p) => p.id !== 0);
+  for (let player of players) {
+    refreshTimeout(player, gameState);
   }
+}
+
+function getPlayersInTeams() {
+  return room.getPlayerList().filter((p) => p.id !== 0 && p.team !== 0);
 }
 
 /**
@@ -201,67 +185,63 @@ function refreshAllTimeouts() {
  * 
  * @param {number} playerId - Id of the player.
  */
-function refreshTimeout(playerId) {
-  let player = room.getPlayer(playerId);
+function refreshTimeout(player, gameState) {
   if (!player) {
-    removeLastActiveTime(playerId);
-    removeTimeout(playerId);
+    removeLastActiveTime(player);
+    removeTimeout(player);
     return;
   }
 
   let adminsOnly = room.getConfig('adminsOnly');
   if (adminsOnly && !player.admin) return;
 
-  const gameState = room.getPlugin('sav/game-state');
-  
   let maxIdleTime = 0;
   let currentTime = Date.now();
   let lastActiveTime = lastActiveTimes.get(player.id);
   lastActiveTime = lastActiveTime || currentTime;
 
-  switch (gameState.getGameState()) {
-    case gameState.states.STOPPED:
-      if (player.admin) {
-        maxIdleTime = room.getConfig('maxAdminIdleTimeWhenStopped');
-        lastActiveTime = currentTime; // ignores the last active time
-      } else {
-        maxIdleTime = room.getConfig('maxIdleTime');
-      }
-      debug(`Game stopped and maxIdleTime for ${player.id} is ${maxIdleTime} seconds.`);
-      break;
+  // determine max idle times for admins
+  if (player.admin) {
+    let actionIsRequired =
+      gameState === gameStates.STOPPED ||
+      gameState === gameStates.PAUSED ||
+      (gameState !== gameStates.STOPPED && getPlayersInTeams() < 1)
 
-    case gameState.states.STARTED:
-      if (player.team === 0) {
-        maxIdleTime = room.getConfig('maxIdleTime');
-      } else {
-        maxIdleTime = room.getConfig('maxIdleTimeWhenPlaying');
-        lastActiveTime = currentTime; // ignores the last active time
-      }
-      debug(`Game started and maxIdleTime for ${player.id} is ${maxIdleTime} seconds.`);
-      break;
+    if (actionIsRequired) {
+      maxIdleTime = room.getConfig('maxAdminIdleTime');
+      lastActiveTime = lastActiveTime < lastAdminActivityTime 
+        ? lastAdminActivityTime 
+        : lastActiveTime;
 
-    case gameState.states.PAUSED:
-      if (player.admin) {
-        maxIdleTime = room.getConfig('maxAdminIdleTimeWhenPaused');
-        lastActiveTime = currentTime; // ignores the last active time
-      } else if (player.team === 0) {
-        maxIdleTime = room.getConfig('maxIdleTime');
-      } else {
-        maxIdleTime = room.getConfig('maxIdleTimeWhenPaused');
-        lastActiveTime = currentTime; // ignores the last active time
-      }
-      debug(`Game paused and maxIdleTime for ${player.id} is ${maxIdleTime} seconds.`);
-      break;
+    } else if (gameState !== gameStates.STOPPED && player.team !== 0) {
+      maxIdleTime = room.getConfig('maxIdleTimeWhenPlaying');
+      // ignore the last active time so players dont kicked straight away when
+      // moved to team or when game is started
+      lastActiveTime = currentTime;
+
+    } else {
+      maxIdleTime = room.getConfig('maxIdleTime');
+    }
+
+  // determine max idle times for players
+  } else {
+    if (gameState !== gameStates.STOPPED && player.team !== 0) {
+      maxIdleTime = room.getConfig('maxIdleTimeWhenPlaying');
+      // ignore the last active time so players dont kicked straight away when
+      // moved to team or when game is started
+      lastActiveTime = currentTime;
+    } else {
+      maxIdleTime = room.getConfig('maxIdleTime');
+    }
   }
 
   maxIdleTimeInMs = maxIdleTime * 1000;
   maxIdleTimeInMs -= currentTime - lastActiveTime;
   let timeToWarn = maxIdleTimeInMs - (room.getConfig('warnBefore') * 1000);
 
-  removeTimeout(player.id);
-  debug(`Kicking player ${player.id} in ${maxIdleTimeInMs / 1000} seconds.`);
-  debug(`Warning player ${player.id} in ${timeToWarn / 1000} seconds.`);
-
+  removeTimeout(player);
+  debug(`Kicking ${player.name} in ${maxIdleTimeInMs / 1000} seconds.`);
+  
   let timeout = setTimeout(kickInactivePlayer, maxIdleTimeInMs, player.id);
   let warnTimeout = setTimeout(warnInactivePlayer, timeToWarn, player.id);
   afkTimeouts.set(player.id, timeout);
@@ -284,13 +264,12 @@ function kickInactivePlayer(playerId) {
  * @param {number} playerId - Id of the player.
  */
 function warnInactivePlayer(playerId) {
-  room.sendChat(
-    `Press movement keys or X or you will be kicked for being AFK!`,
-    playerId
-  );
+  let msg = `Show you are not AFK or get kicked in ${room.getConfig('warnBefore')} seconds.`
+  room.sendChat(msg, playerId);
 }
 
 room.onRoomLink = function onRoomLink() {
+  gameStates = room.getPlugin('sav/game-state').states;
   room.onPlayerChat = onPlayerChat;
   room.onPlayerAdminChange = onPlayerAdminChange;
   room.onPlayerTeamChange = onPlayerTeamChange;
@@ -302,5 +281,4 @@ room.onRoomLink = function onRoomLink() {
   room.onGameUnpause = onGameUnpause;
   room.onPlayerKicked = onPlayerKicked;
   room.onPlayerActivity = onPlayerActivity;
-  room.onGameStateChanged = onGameStateChanged;
 }
