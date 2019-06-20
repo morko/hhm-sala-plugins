@@ -61,7 +61,7 @@ function onPlayerAdminChange(changedPlayer, byPlayer) {
     lastAdminActivityTime = Date.now();
   }
 
-  if (byPlayer.id !== 0 && byPlayer.admin) {
+  if (byPlayer.admin) {
     lastAdminActivityTime = Date.now();
     refreshAllTimeouts(gameState);
   } else {
@@ -73,7 +73,7 @@ function onPlayerAdminChange(changedPlayer, byPlayer) {
 function onPlayerTeamChange(changedPlayer, byPlayer) {  
   let gameState = room.getPlugin('sav/game-state').getGameState();
 
-  if (byPlayer.id !== 0 && byPlayer.admin) {
+  if (byPlayer.admin) {
     lastAdminActivityTime = Date.now();
     refreshAllTimeouts(gameState);
   } else {
@@ -84,7 +84,7 @@ function onPlayerTeamChange(changedPlayer, byPlayer) {
 
 
 function onPlayerKicked(kickedPlayer, reason, ban, byPlayer) {
-  if (byPlayer && byPlayer.id !== kickedPlayer.id && byPlayer.id !== 0) {
+  if (byPlayer && byPlayer.id !== kickedPlayer.id) {
     let gameState = room.getPlugin('sav/game-state').getGameState();
     lastAdminActivityTime = Date.now();
     refreshAllTimeouts(gameState);
@@ -97,30 +97,22 @@ function onPlayerLeave(player) {
 }
 
 function onGameStart(player) {
-  if (player.id !== 0) {
-    lastAdminActivityTime = Date.now();
-  }
+  lastAdminActivityTime = Date.now();
   refreshAllTimeouts(gameStates.STARTED);
 }
 
 function onGameStop(player) {
-  if (player && player.id !== 0) {
-    lastAdminActivityTime = Date.now();
-  }
+  lastAdminActivityTime = Date.now();
   refreshAllTimeouts(gameStates.STOPPED);
 }
 
 function onGamePause(player) {
-  if (player.id !== 0) {
-    lastAdminActivityTime = Date.now();
-  }
+  lastAdminActivityTime = Date.now();
   refreshAllTimeouts(gameStates.PAUSED);
 }
 
 function onGameUnpause(player) {
-  if (player.id !== 0) {
-    lastAdminActivityTime = Date.now();
-  }
+  lastAdminActivityTime = Date.now();
   refreshAllTimeouts(gameStates.STARTED);
 }
 
