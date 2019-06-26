@@ -119,6 +119,20 @@ The default map names in HaxBall are `Classic`, `Easy`, `Small`, `Big`,
   scoreLimit: 3
 }
 ```
+## hr/kickban
+
+Plugin that keeps track of banned players and offers some commands to control 
+the kicking and banning.
+
+If `sav/commands` and `sav/roles` plugins are available, then this plugin
+provides commands `kick`, `ban`, `unban` and `banlist` to be used with
+`admin` and `host` roles.
+
+Exports `bannedPlayers`, `ban`, `unban` and `kick` functions.
+
+### Configuration
+
+This plugin does not accept any configuration options.
 
 ## hr/motd
 
