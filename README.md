@@ -147,10 +147,19 @@ Depends on `sav/cron` of the default HHM plugin repository.
 
 ```js
 'hr/motd': {
-  // Message Of The Day.
-  message: `Join https://discord.gg/TeJAEWu for support.`,
-  // How often to display the message in minutes.
-  // Set to 0 to disable displaying it repeatedly.
+  // If only this option is given the message is displayed when player
+  // joins and also repeated. This is also displayed when using `!motd`
+  // command.
+  message: `Type !help for commands.`,
+  // Message to be displayed when player joins.
+  // You can use {player} to address the joined player.
+  // e.g. `Welcome, {player}!`
+  joinMessage: ``,
+  // Message to be displayed repeatedly at speed of given `interval`.
+  repeatedMessage: ``,
+  // How often to display the `repeatedMessage` (or `message` if former 
+  // is missing).
+  // Time is in minutes. Set to 0 to disable displaying it repeatedly.
   interval: 10
 }
 ```
