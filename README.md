@@ -7,6 +7,7 @@ This repository offers folowing plugins:
 - [hr/always-one-admin](#hralways-one-admin)
 - [hr/ban-protection](#hrban-protection)
 - [hr/game-mode](#hrgame-mode)
+- [hr/kickban](#hrkickban)
 - [hr/motd](#hrmotd)
 - [hr/pause](#hrpause)
 - [hr/spam](#hrspam)
