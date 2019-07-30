@@ -5,8 +5,8 @@
  * Exports `bannedPlayers`, `ban`, `unban` and `kick` functions.
  * 
  * If `sav/commands` and `sav/roles` plugins are available, then this plugin
- * also provides commands `kick`, `ban`, `unban` and `banlist` to be used with
- * `admin` and `host` roles.
+ * also provides commands `clearbans`, `kick`, `ban`, `unban` and `banlist` to
+ * be used with `admin` and `host` roles.
  */
 let room = HBInit();
 
@@ -109,6 +109,16 @@ room.onCommand1_ban = (byPlayer, [pName]) => {
   }
 }
 
+room.onCommand0_clearbans = (byPlayer, [playerId]) => {
+  let roles = room.getPlugin(`sav/roles`);
+  if (!roles) return;
+  if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
+    return;
+  }
+  room.clearBans();
+  room.sendAnnounce(`Bans cleared!`, 0x00FF00);
+}
+
 room.onCommand1_unban = (byPlayer, [playerId]) => {
   let roles = room.getPlugin(`sav/roles`);
   if (!roles) return;
@@ -141,6 +151,7 @@ room.onCommand0_banlist = (byPlayer) => {
 let help = room.getPlugin(`sav/help`);
 if (help) {
   help.registerHelp(`banlist`, ``, {numArgs: 0, roles: allowedRoles});
+  help.registerHelp(`clearbans`, ``, {numArgs: 0, roles: allowedRoles});
   help.registerHelp(`kick`, ` PLAYER_NAME`, {numArgs: 1, roles: allowedRoles});
   help.registerHelp(`ban`, ` PLAYER_NAME`, {numArgs: 1, roles: allowedRoles});
   help.registerHelp(`unban`, ` PLAYER_ID`, {numArgs: 1, roles: allowedRoles});
