@@ -116,7 +116,7 @@ room.onCommand0_clearbans = (byPlayer, [playerId]) => {
     return;
   }
   room.clearBans();
-  room.sendAnnounce(`Bans cleared!`, 0x00FF00);
+  room.sendAnnouncement(`Bans cleared!`, null, 0x00FF00);
 }
 
 room.onCommand1_unban = (byPlayer, [playerId]) => {
