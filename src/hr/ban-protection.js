@@ -3,7 +3,7 @@
  * unwanted banning of players.
  * 
  * If player that **is not** protected bans a player that is protected
- * the banner gets banned himself and the banned player gets unbanned.
+ * the banner gets banned/kicked himself and the banned player gets unbanned.
  * 
  * If player that **is** protected bans another protected player
  * the player does not get banned but the banned player gets unbanned.
@@ -32,7 +32,7 @@ room.pluginSpec = {
     // get kicked / banned if they ban player with protected role.
     allowOnlyProtectedRolesToBan: false,
     // Message to display when kicking / banning.
-    violationMessage: 'You should have not tried to ban that player!',
+    violationMessage: 'You should not have tried to ban that player!',
     // If this is `true` the violators will get banned. Otherwise kicked.
     banTheBanners: false
   },
