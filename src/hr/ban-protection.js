@@ -49,6 +49,7 @@ room.pluginSpec = {
  */
 function isPlayerProtected(playerId) {
   const protectedRoles = room.pluginSpec.config.protectedRoles;
+
   if (!Array.isArray(protectedRoles)) {
     return false;
   }
@@ -64,6 +65,7 @@ function isPlayerProtected(playerId) {
 
 function onPlayerKicked(bannedPlayer, reason, ban, byPlayer) {
   if (!ban) return;
+  if (!byPlayer) return;
   if (byPlayer.id === 0) return;
   
   const violationMessage = room.pluginSpec.config.violationMessage;
@@ -82,8 +84,8 @@ function onPlayerKicked(bannedPlayer, reason, ban, byPlayer) {
     room.kickPlayer(byPlayer.id, violationMessage, banTheBanners);
     room.clearBan(bannedPlayer.id);
   }
+}
 
-  room.onRoomLink = function onRoomLink() {
-    room.onPlayerKicked = onPlayerKicked;
-  }
+room.onRoomLink = function onRoomLink() {
+  room.onPlayerKicked = onPlayerKicked;
 }
