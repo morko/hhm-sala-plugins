@@ -11,20 +11,18 @@ room.pluginSpec = {
   author: `salamini`,
   version: `1.1.0`,
   config: {
-    // If only this option is given the message is displayed when player
-    // joins and also repeated. This is also displayed when using `!motd`
-    // command.
-    message: ``,
     // Message to be displayed when player joins.
     // You can use {player} to address the joined player.
     // e.g. `Welcome, {player}!`
     joinMessage: `Welcome {player}! Type !help for commands.`,
     // Message to be displayed repeatedly at speed of given `interval`.
-    repeatedMessage: `Type !help for commands.`,
+    repeatedMessage: ``,
     // How often to display the `repeatedMessage` (or `message` if former 
     // is missing).
     // Time is in minutes. Set to 0 to disable the repeated message.
-    interval: 10
+    interval: 10,
+    // This setting exists only for backwards compability.
+    message: ``,
   },
   dependencies: [`sav/cron`]
 };
@@ -60,7 +58,7 @@ function onPlayerJoin(player) {
 }
 
 function displayMessageOnceIn(interval) {
-  if (parseInt(interval) > 0) {
+  if (parseInt(interval) > 0 && getRepeatedMessage()) {
     room[`onCron${interval}Minutes`] = () => {
       const message = getRepeatedMessage();
       room.sendAnnouncement(message, null, 0x00FF00);
@@ -82,7 +80,5 @@ room.onConfigSet = () => {
 
 room.onRoomLink = function onRoomLink() {
   room.onPlayerJoin = onPlayerJoin;
-
-  let msg = getRepeatedMessage();
-  displayMessageOnceIn(currentInterval, msg);
+  displayMessageOnceIn(currentInterval);
 }
