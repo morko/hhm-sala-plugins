@@ -37,6 +37,10 @@ function onGameStop() {
 }
 
 function onPlayerChat(player, message) {
+  if (!player) return;
+  if (player.id === 0) return;
+  if (player.team === 0) return;
+  
   const allowPlayersToPause = room.getConfig('allowPlayersToPause');
   if (!allowPlayersToPause || message !== 'p') return;
 
