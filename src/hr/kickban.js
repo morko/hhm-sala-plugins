@@ -57,6 +57,14 @@ room.extend('clearBan', ({ previousFunction }, playerId) => {
 });
 
 /**
+ * Extend the native room.clearBans function so that banlist is emptied.
+ */
+room.extend('clearBans', ({ previousFunction }) => {
+  previousFunction();
+  bannedPlayerMap = new Map();
+});
+
+/**
  * Gets the player object with given player name.
  * @param {string} pName - Player name prefixed with @ or without.
  * @returns {object|undefined} - Player object or undefined if no such player.
