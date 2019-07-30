@@ -19,11 +19,11 @@ function onTeamVictory(scores) {
   if (scores.red > scores.blue) {
     blueTeamStreak = 0;
     redTeamStreak++;
-    room.sendAnnouncement(`Red team has won ${blueTeamStreak} games in a row!`, null, 0xE56E56);
+    room.sendAnnouncement(`Red team has won ${redTeamStreak} games in a row!`, null, 0xE56E56);
   } else {
     redTeamStreak = 0;
     blueTeamStreak++;
-    room.sendAnnouncement(`Blue team has won ${redTeamStreak} games in a row!`, null, 0x5689E5);
+    room.sendAnnouncement(`Blue team has won ${blueTeamStreak} games in a row!`, null, 0x5689E5);
   }
 }
 
