@@ -83,11 +83,11 @@ room.onCommand1_kick = (byPlayer, [pName]) => {
   }
   let player = getPlayerWithName(pName);
   if (!player) {
-    room.sendChat(`No player with name ${pName}.`, byPlayer.id);
+    room.sendAnnouncement(`No player with name ${pName}.`, byPlayer.id, 0xFF0000);
     return;
   }
   if (!kick(player.id)) {
-    room.sendChat(`Could not kick player ${pName}.`, byPlayer.id);
+    room.sendAnnouncement(`Could not kick player ${pName}.`, byPlayer.id, 0xFF0000);
     return;
   }
 }
@@ -100,11 +100,11 @@ room.onCommand1_ban = (byPlayer, [pName]) => {
   }
   let player = getPlayerWithName(pName);
   if (!player) {
-    room.sendChat(`No player with name ${pName}.`, byPlayer.id);
+    room.sendAnnouncement(`No player with name ${pName}.`, byPlayer.id, 0xFF0000);
     return;
   }
   if (!ban(player.id)) {
-    room.sendChat(`Could not ban player ${pName}.`, byPlayer.id);
+    room.sendAnnouncement(`Could not ban player ${pName}.`, byPlayer.id, 0xFF0000);
     return;
   }
 }
@@ -126,9 +126,11 @@ room.onCommand1_unban = (byPlayer, [playerId]) => {
     return;
   }
   if (!unban(playerId)) {
-    room.sendChat(
+    room.sendAnnouncement(
       `Could not remove ban of player with id ${playerId}. `
-      + `Make sure that the id matches one in the banlist.`
+      + `Make sure that the id matches one in the banlist.`,
+      byPlayer.id,
+      0xFF0000
     );
   }
 }
@@ -141,11 +143,11 @@ room.onCommand0_banlist = (byPlayer) => {
   }
   let bPlayers = bannedPlayers();
   if (bPlayers.length === 0) {
-    room.sendChat('No banned players.', byPlayer.id);
+    room.sendAnnouncement('No banned players.', byPlayer.id, 0xFF0000);
     return;
   }
   let bpList = bPlayers.map((p) =>`id:${p.id} - ${p.name}`)
-  room.sendChat(bpList.join('\n'), byPlayer.id);
+  room.sendAnnouncement(bpList.join('\n'), byPlayer.id, 0x00FF00);
 }
 
 let help = room.getPlugin(`sav/help`);

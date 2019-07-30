@@ -42,7 +42,7 @@ function onStadiumChange(newMapName, byPlayer) {
     currentMap = newMapName;
   } else {
     room.setDefaultStadium(currentMap);
-    room.sendChat(`Allowed maps are: ${allowedMaps.join(', ')}.`, byPlayer.id);
+    room.sendAnnouncement(`Allowed maps are: ${allowedMaps.join(', ')}.`, byPlayer.id, 0xFF0000);
   }
 }
 

@@ -58,7 +58,11 @@ function onPlayerChat(player, message) {
   
   const maxPauseTimes = room.getConfig('maxPauseTimes');
   if (maxPauseTimes !== 0 && counter > maxPauseTimes) {
-    room.sendChat(`You are only allowed to pause ${maxPauseTimes} per game!`);
+    room.sendAnnouncement(
+      `You are only allowed to pause ${maxPauseTimes} per game!`,
+      player.id,
+      0xFF0000
+    );
     return;
   }
 

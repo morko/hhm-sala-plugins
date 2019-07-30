@@ -38,7 +38,7 @@ let similarMessages = new Map();
 
 function warnPlayer(player) {
   let warningMessage = room.pluginSpec.config.warningMessage;
-  room.sendChat(warningMessage, player.id);
+  room.sendAnnouncement(warningMessage, player.id, 0xFF0000);
 }
 
 function banPlayer(player) {

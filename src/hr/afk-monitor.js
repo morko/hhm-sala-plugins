@@ -257,7 +257,7 @@ function kickInactivePlayer(playerId) {
  */
 function warnInactivePlayer(playerId) {
   let msg = `Show you are not AFK or get kicked in ${room.getConfig('warnBefore')} seconds.`
-  room.sendChat(msg, playerId);
+  room.sendAnnouncement(msg, playerId, 0xFF0000);
 }
 
 room.onRoomLink = function onRoomLink() {
