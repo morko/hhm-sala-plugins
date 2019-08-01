@@ -14,6 +14,7 @@ room.pluginSpec = {
   version: `1.0.0`,
   dependencies: [
     `sav/commands`,
+    `sav/players`
   ],
 };
 
@@ -21,6 +22,37 @@ room.onCommand_bb = (player) => {
   room.kickPlayer(player.id, 'Good Bye!', false);
 };
 
+room.onCommand2_pm = (fromPlayer, [id, msg]) => {
+  let intId = parseInt(id);
+
+  if (!intId) {
+    intId = parseInt(id.slice(1));
+  }
+
+  if (!intId) {
+    let toPName = id.slice(1);
+    let player = room.getPlayerList().filter(p => p.name === toPName)[0];
+    
+    if (!player) {
+      player = room.getPlayerList().filter(p => p.name === id)[0];
+    }
+
+    if (player) intId = player.id;
+  }
+
+  let toPlayer = room.getPlayer(intId);
+
+  if (!toPlayer) {
+    room.sendAnnouncement(
+      `Could not send PM to ${id}`, fromPlayer.id, 0xFF0000
+    );
+    return false;
+  }
+
+  let pm = `PM ${fromPlayer.name}: ${msg}`;
+  room.sendAnnouncement(pm, toPlayer.id, 0xA98ABF);
+  return false;
+};
 
 room.onCommand_swap = (player) => {
   if (player.admin) {
@@ -64,4 +96,8 @@ if (help) {
   help.registerHelp(`bb`, ` (leave room immediately)`);
   help.registerHelp(`swap`, ` (swap teams if you are an admin)`);
   help.registerHelp(`rr`, ` (restart game if you are an admin)`);
+  help.registerHelp(
+    `pm`, 
+    ` #PLAYER_ID|@PLAYER_NAME MSG (send a private message to a player)`
+  );
 }
