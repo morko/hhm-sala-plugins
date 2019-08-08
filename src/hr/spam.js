@@ -7,7 +7,7 @@ var room = HBInit();
 room.pluginSpec = {
   name: `hr/spam`,
   author: `salamini`,
-  version: `1.0.0`,
+  version: `1.1.0`,
   config: {
     // If buffer fills within this interval then action is taken.
     // The unit is milliseconds.
@@ -17,18 +17,24 @@ room.pluginSpec = {
     // How many messages within the interval before player is banned.
     maxBuffer: 4,
     // How many similar messages before player is warned.
-    warnSimilar: 2,
+    warnSimilar: 3,
     // How many similar messages before player is banned.
-    maxSimilar: 3,
+    maxSimilar: 4,
     // Message to send when warning player for spamming.
-    warningMessage: `STOP SPAMMING`,
-    // Message to send when player gets banned for spamming.
-    banMessage: `SPAM`
+    warningMessage: `STOP SPAMMING OR YOU WILL BE BANNED/KICKED`,
+    // Message to send when warning player for repeating himself.
+    warningMessageOnSimilar: `STOP REPEATING YOURSELF OR YOU WILL BE ` +
+      `BANNED/KICKED`,
+    // Message to send when player gets banned/kicked for spamming.
+    banMessage: `SPAM`,
+    // Whether to ban the spammers or not.
+    ban: true,
+    // Do not ban/kick players protected by the `hr/ban-protection` plugin.
+    ignoreProtected: true
   },
   order: {
     onPlayerChat: {
-      // TODO: temporarily disabled because of bug in HHM
-      //before: [`sav/commands`],
+      before: [`sav/commands`],
     }
   }
 };
@@ -36,14 +42,20 @@ room.pluginSpec = {
 let messageBuffers = new Map();
 let similarMessages = new Map();
 
-function warnPlayer(player) {
-  let warningMessage = room.pluginSpec.config.warningMessage;
+function warnPlayer(player, onSimilar = false) {
+  let warningMessage;
+  if (onSimilar) {
+    warningMessage = room.getConfig('warningMessageOnSimilar');
+  } else {
+    warningMessage = room.getConfig('warningMessage');
+  }
   room.sendAnnouncement(warningMessage, player.id, 0xFF0000);
 }
 
 function banPlayer(player) {
-  let banMessage = room.pluginSpec.config.banMessage;
-  room.kickPlayer(player.id, banMessage, true);
+  let banMessage = room.getConfig('banMessage');
+  let ban = room.getConfig('ban');
+  room.kickPlayer(player.id, banMessage, ban);
 }
 
 function onPlayerJoin(player) {
@@ -57,6 +69,15 @@ function onPlayerLeave(player) {
 }
 
 function onPlayerChat(player, message) {
+  let banProtection = room.getPlugin('hr/ban-protection');
+  if (banProtection && room.getConfig('ignoreProtected')) {
+    let roles = room.getPlugin('sav/roles');
+    let protectedRoles = banProtection.getConfig('protectedRoles');
+    for (let role of protectedRoles) {
+      if (roles.hasPlayerRole(player.id, role)) return;
+    }
+  }
+
   // make sure the player has the needed Maps to keep track of stuff
   if (!messageBuffers.has(player.id)) messageBuffers.set(player.id, []);
   if (!similarMessages.has(player.id)) {
@@ -77,7 +98,7 @@ function onPlayerChat(player, message) {
       banPlayer(player);
       return;
     } else if (counter >= warnSimilar) {
-      warnPlayer(player);
+      warnPlayer(player, true);
       hasBeenWarned = true;
     }
   } else {
@@ -103,7 +124,7 @@ function onPlayerChat(player, message) {
     banPlayer(player);
     return;
   } else if (updatedBuffer.length > warnBuffer) {
-    if (!hasBeenWarned) warnPlayer(player);
+    if (!hasBeenWarned) warnPlayer(player, false);
   }
   messageBuffers.set(player.id, updatedBuffer);
 
