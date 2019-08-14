@@ -11,7 +11,7 @@ const room = HBInit();
 room.pluginSpec = {
   name: `hr/simple-commands`,
   author: `salamini`,
-  version: `1.0.0`,
+  version: `1.0.1`,
   dependencies: [
     `sav/commands`,
     `sav/players`
@@ -22,7 +22,17 @@ room.onCommand_bb = (player) => {
   room.kickPlayer(player.id, 'Good Bye!', false);
 };
 
-room.onCommand2_pm = (fromPlayer, [id, msg]) => {
+room.onCommand_pm = (fromPlayer, args) => {
+  if (!Array.isArray(args) || args.length < 2) {
+    room.sendAnnouncement(
+      `Usage: !pm PLAYER MESSAGE`, fromPlayer.id, 0xFF0000
+    );
+    return false;
+  }
+
+  const id = args[0];
+  const msg = args.slice(1).join(' ');
+
   let intId = parseInt(id);
 
   if (!intId) {
@@ -97,7 +107,6 @@ if (help) {
   help.registerHelp(`swap`, ` (swap teams if you are an admin)`);
   help.registerHelp(`rr`, ` (restart game if you are an admin)`);
   help.registerHelp(
-    `pm`, 
-    ` #PLAYER_ID|@PLAYER_NAME MSG (send a private message to a player)`
+    `pm`, ` PLAYER MESSAGE (send a private message to a player)`
   );
 }
