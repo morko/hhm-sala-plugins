@@ -1,6 +1,6 @@
 {
   "name": "morko/hhm-sala-plugins",
-  "description": "Salamini's helpful plugins.",
+  "description": "Salamini's plugins that work great with haxroomie and more.",
   "author": "salamini",
   "config": {
     "path": "src"
@@ -13,6 +13,9 @@
     "hr/always-one-admin",
     "hr/game-mode",
     "hr/motd",
-    "hr/spam"
+    "hr/spam",
+    "hr/simple-commands",
+    "hr/unadmin-protection",
+    "hr/win-streak"
   ]
 }
