@@ -11,74 +11,82 @@ const room = HBInit();
 room.pluginSpec = {
   name: `hr/simple-commands`,
   author: `salamini`,
-  version: `1.0.1`,
+  version: `1.2.1`,
   dependencies: [
     `sav/commands`,
     `sav/players`
   ],
 };
 
-room.onCommand_bb = (player) => {
-  room.kickPlayer(player.id, 'Good Bye!', false);
-};
-
-room.onCommand_pm = (fromPlayer, args) => {
-  if (!Array.isArray(args) || args.length < 2) {
-    room.sendAnnouncement(
-      `Usage: !pm PLAYER MESSAGE`, fromPlayer.id, 0xFF0000
-    );
-    return false;
+room.onCommand_bb = {
+  function: (player) => {
+    room.kickPlayer(player.id, 'Good Bye!', false);
   }
+}
 
-  const id = args[0];
-  const msg = args.slice(1).join(' ');
-
-  let intId = parseInt(id);
-
-  if (!intId) {
-    intId = parseInt(id.slice(1));
-  }
-
-  if (!intId) {
-    let toPName = id.slice(1);
-    let player = room.getPlayerList().filter(p => p.name === toPName)[0];
-    
-    if (!player) {
-      player = room.getPlayerList().filter(p => p.name === id)[0];
+room.onCommand_pm = {
+  function: (fromPlayer, args) => {
+    if (!Array.isArray(args) || args.length < 2) {
+      room.sendAnnouncement(
+        `Usage: !pm PLAYER MESSAGE`, fromPlayer.id, 0xFF0000
+      );
+      return false;
     }
 
-    if (player) intId = player.id;
-  }
+    const id = args[0];
+    const msg = args.slice(1).join(' ');
 
-  let toPlayer = room.getPlayer(intId);
+    let intId = parseInt(id);
 
-  if (!toPlayer) {
-    room.sendAnnouncement(
-      `Could not send PM to ${id}`, fromPlayer.id, 0xFF0000
-    );
+    if (!intId) {
+      intId = parseInt(id.slice(1));
+    }
+
+    if (!intId) {
+      let toPName = id.slice(1);
+      let player = room.getPlayerList().filter(p => p.name === toPName)[0];
+      
+      if (!player) {
+        player = room.getPlayerList().filter(p => p.name === id)[0];
+      }
+
+      if (player) intId = player.id;
+    }
+
+    let toPlayer = room.getPlayer(intId);
+
+    if (!toPlayer) {
+      room.sendAnnouncement(
+        `Could not send PM to ${id}`, fromPlayer.id, 0xFF0000
+      );
+      return false;
+    }
+
+    let pm = `PM ${fromPlayer.name}: ${msg}`;
+    room.sendAnnouncement(pm, toPlayer.id, 0xA98ABF);
     return false;
   }
+}
 
-  let pm = `PM ${fromPlayer.name}: ${msg}`;
-  room.sendAnnouncement(pm, toPlayer.id, 0xA98ABF);
-  return false;
-};
-
-room.onCommand_swap = (player) => {
-  if (player.admin) {
-    swapTeams(player);
-  } else {
-    room.sendAnnouncement('You need admin to use this command!', player.id, 0xFF0000);
+room.onCommand_swap = {
+  function: (player) => {
+    if (player.admin) {
+      swapTeams(player);
+    } else {
+      room.sendAnnouncement('You need admin to use this command!', player.id, 0xFF0000);
+    }
   }
-};
+}
 
-room.onCommand_rr = (player) => {
-  if (player.admin) {
-    restartGame();
-  } else {
-    room.sendAnnouncement('You need admin to use this command!', player.id, 0xFF0000);
+room.onCommand_rr = {
+  function: (player) => {
+    if (player.admin) {
+      restartGame();
+    } else {
+      room.sendAnnouncement('You need admin to use this command!', player.id, 0xFF0000);
+    }
   }
-};
+}
 
 function restartGame() {
   room.stopGame();

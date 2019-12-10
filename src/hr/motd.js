@@ -9,7 +9,7 @@ let room = HBInit();
 room.pluginSpec = {
   name: `hr/motd`,
   author: `salamini`,
-  version: `1.1.0`,
+  version: `1.2.0`,
   config: {
     // Message to be displayed when player joins.
     // You can use {player} to address the joined player.
@@ -66,9 +66,11 @@ function displayMessageOnceIn(interval) {
   }
 }
 
-room.onCommand0_motd = (player) => {
-  const message = room.getConfig('message');
-  room.sendAnnouncement(message, player.id, 0x00FF00);
+room.onCommand0_motd = {
+  function: (player) => {
+    const message = room.getConfig('message');
+    room.sendAnnouncement(message, player.id, 0x00FF00);
+  },
 }
 
 room.onConfigSet = () => {
