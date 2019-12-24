@@ -7,14 +7,14 @@
   },
   "plugins": [
     "hr/afk-monitor",
-    "hr/ban-protection",
-    "hr/kickban",
-    "hr/pause",
     "hr/always-one-admin",
+    "hr/ban-protection",
     "hr/game-mode",
+    "hr/kickban",
     "hr/motd",
-    "hr/spam",
+    "hr/pause",
     "hr/simple-commands",
+    "hr/spam",
     "hr/unadmin-protection",
     "hr/win-streak"
   ]
