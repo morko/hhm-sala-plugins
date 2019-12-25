@@ -69,13 +69,13 @@ const DEFAULT_MAPS = [
 ];
 
 room.onCommand_maps = player => {
-  if (!isAdmin) return;
+  if (!isAdmin(player)) return;
   displayMaps(player.id);
 };
 
 room.onCommand_setmap = (player, args) => {
+  if (!isAdmin(player)) return;
   let mapName = args.join(" ");
-  if (!isAdmin) return;
   if (!setMap(mapName)) {
     room.sendAnnouncement("Map not found.", player.id, 0xff0000);
   }
