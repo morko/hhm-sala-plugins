@@ -137,7 +137,7 @@ room.onRoomLink = () => {
 
   let help = room.getPlugin(`sav/help`);
   if (help) {
-    help.registerHelp(`maps`, ` (list available custom maps)`);
-    help.registerHelp(`setmap`, ` [mapName] (changes the map)`);
+    help.registerHelp(`maps`, ` (lists available custom maps)`);
+    help.registerHelp(`setmap`, ` MAP_NAME (changes the map)`);
   }
 };
