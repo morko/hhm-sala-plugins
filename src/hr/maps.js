@@ -1,13 +1,40 @@
 /**
  * Allows to set custom maps that can be listed and loaded using room commands.
- * To use the commands the user must have admin.
+ * To use the commands the user must have admin. !setmap command also allows
+ * to set the map into a default HaxBall map. The map can only be set when
+ * then game is not running.
  * 
- * The hr/game-mode plugin will automatically allow the maps set with this
- * plugin.
+ * If you are using hr/game-mode plugin:
+ *  - leave enabledMaps undefined to allow all the maps
+ *  - or add the maps u wish to allow into the enabledMaps array
+ *    (the keys of the maps config property)
+ * 
+ * For example to add the medium map and only allow that with the hr/game-mode
+ * plugin in haxroomie-cli config:
+ * ```
+ * 'hr/game-mode': {
+ *   defaultMap: 'Medium',
+ *   allowedMaps: { 'Medium' }
+ * },
+ * 'hr/maps': {
+ *   maps: {
+ *     Medium:
+ *       '{"name":"Medium","width":500,"height":250,"spawnDistance":250,"bg":{"type":"grass","width":450,"height":220,"kickOffRadius":80,"cornerRadius":0},"vertexes":[{"x":-450,"y":220,"trait":"ballArea"},{"x":-450,"y":70,"trait":"ballArea"},{"x":-450,"y":-70,"trait":"ballArea"},{"x":-450,"y":-220,"trait":"ballArea"},{"x":450,"y":220,"trait":"ballArea"},{"x":450,"y":80,"trait":"ballArea"},{"x":450,"y":-80,"trait":"ballArea"},{"x":450,"y":-220,"trait":"ballArea"},{"x":0,"y":270,"trait":"kickOffBarrier"},{"x":0,"y":80,"trait":"kickOffBarrier"},{"x":0,"y":-80,"trait":"kickOffBarrier"},{"x":0,"y":-270,"trait":"kickOffBarrier"},{"x":-460,"y":-80,"trait":"goalNet"},{"x":-480,"y":-60,"trait":"goalNet"},{"x":-480,"y":60,"trait":"goalNet"},{"x":-460,"y":80,"trait":"goalNet"},{"x":460,"y":-80,"trait":"goalNet"},{"x":480,"y":-60,"trait":"goalNet"},{"x":480,"y":60,"trait":"goalNet"},{"x":460,"y":80,"trait":"goalNet"}],"segments":[{"v0":0,"v1":1,"trait":"ballArea"},{"v0":2,"v1":3,"trait":"ballArea"},{"v0":4,"v1":5,"trait":"ballArea"},{"v0":6,"v1":7,"trait":"ballArea"},{"v0":12,"v1":13,"trait":"goalNet","curve":-90},{"v0":13,"v1":14,"trait":"goalNet"},{"v0":14,"v1":15,"trait":"goalNet","curve":-90},{"v0":16,"v1":17,"trait":"goalNet","curve":90},{"v0":17,"v1":18,"trait":"goalNet"},{"v0":18,"v1":19,"trait":"goalNet","curve":90},{"v0":8,"v1":9,"trait":"kickOffBarrier"},{"v0":9,"v1":10,"trait":"kickOffBarrier","curve":180,"cGroup":["blueKO"]},{"v0":9,"v1":10,"trait":"kickOffBarrier","curve":-180,"cGroup":["redKO"]},{"v0":10,"v1":11,"trait":"kickOffBarrier"}],"goals":[{"p0":[-450,80],"p1":[-450,-80],"team":"red"},{"p0":[450,80],"p1":[450,-80],"team":"blue"}],"discs":[{"pos":[-450,80],"trait":"goalPost","color":"FFCCCC"},{"pos":[-450,-80],"trait":"goalPost","color":"FFCCCC"},{"pos":[450,80],"trait":"goalPost","color":"CCCCFF"},{"pos":[450,-80],"trait":"goalPost","color":"CCCCFF"}],"planes":[{"normal":[0,1],"dist":-220,"trait":"ballArea"},{"normal":[0,-1],"dist":-220,"trait":"ballArea"},{"normal":[0,1],"dist":-250,"bCoef":0.1},{"normal":[0,-1],"dist":-250,"bCoef":0.1},{"normal":[1,0],"dist":-500,"bCoef":0.1},{"normal":[-1,0],"dist":-500,"bCoef":0.1}],"traits":{"ballArea":{"vis":false,"bCoef":1,"cMask":["ball"]},"goalPost":{"radius":8,"invMass":0,"bCoef":0.5},"goalNet":{"vis":true,"bCoef":0.1,"cMask":["ball"]},"kickOffBarrier":{"vis":false,"bCoef":0.1,"cGroup":["redKO","blueKO"],"cMask":["red","blue"]}}}'
+ *   }
+ * }
+ * ```
  * 
  * Commands:
- *   !maps (lists maps)
- *   !setmap [mapName] (changes the map to given map)
+ *    !maps (lists all enabled maps)
+ *    !setmap MAP_NAME (changes the map to given map)
+ * 
+ * Exports:
+ *    mapsPlugin.setMap(mapName) (changes the map)
+ *    mapsPlugin.hasMap(mapName) (chacks if the plugin has given map)
+ *    mapsPlugin.getMaps() (returns array of custom maps)
+ *    mapsPlugin.displayMaps(playerId, [displayAllMaps = false]) (sends the
+ *      list of maps to the player with given id if displayMaps==true all
+ *      maps will be displayed)
  * 
  * The original plugin was made by Herna
  * https://github.com/XHerna/hhm-plugins/blob/master/src/tut/maps.js
@@ -56,16 +83,16 @@ room.pluginSpec = {
 };
 
 const DEFAULT_MAPS = [
-  "Classic",
-  "Easy",
-  "Small",
-  "Big",
-  "Rounded",
-  "Hockey",
-  "Big Hockey",
-  "Big Easy",
-  "Big Rounded",
-  "Huge"
+  'Classic',
+  'Easy',
+  'Small',
+  'Big',
+  'Rounded',
+  'Hockey',
+  'Big Hockey',
+  'Big Easy',
+  'Big Rounded',
+  'Huge'
 ];
 
 room.onCommand_maps = player => {
@@ -73,18 +100,18 @@ room.onCommand_maps = player => {
   displayMaps(player.id);
 };
 
-room.onCommand_setmap = (player, args) => {
+room.onCommand_setMap = (player, args) => {
   if (!isAdmin(player)) return;
-  let mapName = args.join(" ");
+  let mapName = args.join(' ');
   if (!setMap(mapName)) {
-    room.sendAnnouncement("Map not found.", player.id, 0xff0000);
+    room.sendAnnouncement('Map not found.', player.id, 0xff0000);
   }
 };
 
 function isAdmin(player) {
   if (!player.admin) {
     room.sendAnnouncement(
-      "You have to be admin to use this command!",
+      'You have to be admin to use this command!',
       player.id,
       0xff0000
     );
@@ -94,11 +121,11 @@ function isAdmin(player) {
 }
 
 function setMap(mapName) {
-  let maps = room.getConfig("maps");
+  let maps = room.getConfig('maps');
   if (DEFAULT_MAPS.includes(mapName)) {
     room.setDefaultStadium(mapName);
     return true;
-  } else if (Object.keys(maps).includes(mapName)) {
+  } else if (getMaps().includes(mapName)) {
     room.setCustomStadium(maps[mapName]);
     return true;
   } else {
@@ -106,11 +133,42 @@ function setMap(mapName) {
   }
 }
 
-function displayMaps(id) {
-  let maps = room.getConfig("maps");
-  let output = "Maps:\n";
-  for (let key in maps) {
-    output += `${key}, `;
+function hasMap(mapName) {
+  if (!room.getConfig('maps')) return false;
+  return !!room.getConfig('maps')[mapName];
+}
+
+function getMaps() {
+  let maps = room.getConfig('maps');
+  if (!maps) {
+    return [];
+  }
+  return Object.keys(maps);
+}
+
+function displayMaps(id, displayAllMaps) {
+  let output = 'Maps:\n';
+
+  if (displayAllMaps) {
+    let maps = [...getMaps(), ...DEFAULT_MAPS];
+    for (let map of maps) {
+      output += `${map}, `;
+    }
+  } else {
+    let maps = [...getMaps(), ...DEFAULT_MAPS];
+    const gameModePlugin = room.getPlugin('hr/game-mode');
+
+    if (gameModePlugin && gameModePlugin.isRestrictingMaps()) {
+      for (let map of maps) {
+        if (gameModePlugin.isEnabledMap(map)) {
+          output += `${map}, `;
+        }
+      }
+    } else {
+      for (let map of maps) {
+        output += `${map}, `;
+      }
+    }
   }
   output = output.slice(0, -2);
   room.sendAnnouncement(output, id, 0xdf9eff);
@@ -121,23 +179,27 @@ function displayMaps(id) {
  * for sure. It uses Array.prototype.join(' ') to join the arguments together.
  */
 function sanitizeMapNames() {
-  let maps = room.getConfig("maps");
+  let maps = room.getConfig('maps');
   let newMaps = {};
-  let regex = new RegExp("  ");
+  let regex = new RegExp('  ');
   for (let key in maps) {
-    let newKey = key.replace(regex, " ");
+    let newKey = key.replace(regex, ' ');
     newMaps[newKey] = maps[key];
   }
-  room.setConfig("maps", newMaps);
+  room.setConfig('maps', newMaps);
 }
 
 room.onRoomLink = () => {
   room.setMap = setMap;
+  room.hasMap = hasMap;
+  room.getMaps = getMaps;
+  room.displayMaps = displayMaps;
+
   sanitizeMapNames();
 
   let help = room.getPlugin(`sav/help`);
   if (help) {
-    help.registerHelp(`maps`, ` (lists available custom maps)`);
+    help.registerHelp(`maps`, ` (lists all enabled maps)`);
     help.registerHelp(`setmap`, ` MAP_NAME (changes the map)`);
   }
 };
