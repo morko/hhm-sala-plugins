@@ -186,11 +186,6 @@ function sanitizeMapNames() {
 }
 
 room.onRoomLink = () => {
-  room.setMap = setMap;
-  room.hasMap = hasMap;
-  room.getMaps = getMaps;
-  room.displayMaps = displayMaps;
-
   sanitizeMapNames();
 
   let help = room.getPlugin(`sav/help`);
@@ -199,3 +194,8 @@ room.onRoomLink = () => {
     help.registerHelp(`setmap`, ` MAP_NAME (changes the map)`);
   }
 };
+
+room.setMap = setMap;
+room.hasMap = hasMap;
+room.getMaps = getMaps;
+room.displayMaps = displayMaps;

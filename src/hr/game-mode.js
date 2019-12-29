@@ -306,9 +306,6 @@ room.onRoomLink = function onRoomLink() {
   room.setTeamsLock(room.getConfig('lockTeams'));
   room.setTimeLimit(room.getConfig('timeLimit'));
   room.setScoreLimit(room.getConfig('scoreLimit'));
-  room.onGameStart = onGameStart;
-  room.isEnabledMap = isEnabledMap;
-  room.isRestrictingMaps = isRestrictingMaps;
   let help = room.getPlugin(`sav/help`);
   if (help) {
     help.registerHelp(`enableAllMaps`, ` (allows all maps)`, {
@@ -342,5 +339,9 @@ room.onRoomLink = function onRoomLink() {
   } else {
     setMap(initialMap);
   }
-  room.onStadiumChange = onStadiumChange;
 };
+
+room.onGameStart = onGameStart;
+room.isEnabledMap = isEnabledMap;
+room.isRestrictingMaps = isRestrictingMaps;
+room.onStadiumChange = onStadiumChange;
