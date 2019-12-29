@@ -266,7 +266,7 @@ function onStadiumChange(newMapName, byPlayer) {
  * not get loaded before this plugin. Doing it this way we do not have to
  * depend on hr/maps but still allow custom maps as the defaults.
  */
-HHM.deferreds.managerStarted.done(onPluginsLoaded);
+HHM.deferreds.managerStarted.done(() => onPluginsLoaded());
 function onPluginsLoaded() {
   let initialMap = room.getConfig('defaultMap');
   if (isRestrictingMaps()) {
