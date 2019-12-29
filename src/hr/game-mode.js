@@ -40,7 +40,7 @@ room.pluginSpec = {
   name: `hr/game-mode`,
   author: `salamini`,
   version: `1.0.0`,
-  dependencies: ['sav/roles'],
+  dependencies: ['sav/roles', 'hr/maps'],
   config: {
     // Map to load when starting the room.
     defaultMap: 'Big',
@@ -261,31 +261,6 @@ function onStadiumChange(newMapName, byPlayer) {
   }
 }
 
-/**
- * Sets the initial map after all plugins were loaded, because hr/maps might
- * not get loaded before this plugin. Doing it this way we do not have to
- * depend on hr/maps but still allow custom maps as the defaults.
- */
-HHM.deferreds.managerStarted.done(() => onPluginsLoaded());
-function onPluginsLoaded() {
-  let initialMap = room.getConfig('defaultMap');
-  console.log(JSON.stringify(room.getPlugin('hr/maps')));
-  if (isRestrictingMaps()) {
-    if (isEnabledMap(initialMap)) {
-      setMap(initialMap);
-    } else {
-      console.warn(
-        `Could not set default map as "${initialMap}", because its not enabled.`
-      );
-      initialMap = room.getConfig('enabledMaps')[0];
-      setMap(initialMap);
-    }
-  } else {
-    setMap(initialMap);
-  }
-  room.onStadiumChange = onStadiumChange;
-}
-
 function onGameStart(byPlayer) {
   if (!byPlayer || byPlayer.id === 0) return;
 
@@ -353,4 +328,19 @@ room.onRoomLink = function onRoomLink() {
       }
     );
   }
+  let initialMap = room.getConfig('defaultMap');
+  if (isRestrictingMaps()) {
+    if (isEnabledMap(initialMap)) {
+      setMap(initialMap);
+    } else {
+      console.warn(
+        `Could not set default map as "${initialMap}", because its not enabled.`
+      );
+      initialMap = room.getConfig('enabledMaps')[0];
+      setMap(initialMap);
+    }
+  } else {
+    setMap(initialMap);
+  }
+  room.onStadiumChange = onStadiumChange;
 };
