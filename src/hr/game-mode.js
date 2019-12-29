@@ -13,7 +13,7 @@
  * ```
  * 'hr/game-mode': {
  *   defaultMap: 'Medium',
- *   allowedMaps: { 'Medium' }
+ *   enabledMaps: [ 'Medium' ]
  * },
  * 'hr/maps': {
  *   maps: {
