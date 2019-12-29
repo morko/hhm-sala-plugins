@@ -269,6 +269,7 @@ function onStadiumChange(newMapName, byPlayer) {
 HHM.deferreds.managerStarted.done(() => onPluginsLoaded());
 function onPluginsLoaded() {
   let initialMap = room.getConfig('defaultMap');
+  console.log(JSON.stringify(room.getPlugin('hr/maps')));
   if (isRestrictingMaps()) {
     if (isEnabledMap(initialMap)) {
       setMap(initialMap);
