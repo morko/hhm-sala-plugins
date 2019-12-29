@@ -1,7 +1,6 @@
 /**
  * Allows to set custom maps that can be listed and loaded using room commands.
- * To use the commands the user must have admin. !setmap command also allows
- * to set the map into a default HaxBall map. The map can only be set when
+ * To use the commands the user must have admin. The map can only be set when
  * then game is not running.
  * 
  * If you are using hr/game-mode plugin:
