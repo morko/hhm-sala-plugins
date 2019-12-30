@@ -311,7 +311,7 @@ room.onRoomLink = function onRoomLink() {
     help.registerHelp(`enableAllMaps`, ` (allows all maps)`, {
       roles: room.getConfig('allowedRoles')
     });
-    help.registerHelp(`availableMaps`, ` (displays all available maps)`, {
+    help.registerHelp(`mapsAvailable`, ` (displays all available maps)`, {
       roles: room.getConfig('allowedRoles')
     });
     help.registerHelp(`enableMap`, ` MAP_NAME (adds the map to allowed maps)`, {
