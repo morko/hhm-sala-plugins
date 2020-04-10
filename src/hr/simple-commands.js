@@ -12,11 +12,11 @@ room.pluginSpec = {
   name: `hr/simple-commands`,
   author: `salamini`,
   version: `1.1.1`,
-  dependencies: [`sav/commands`, `sav/players`]
+  dependencies: [`sav/commands`, `sav/players`],
 };
 
-room.onCommand_bb = player => {
-  room.kickPlayer(player.id, "Good Bye!", false);
+room.onCommand_bb = (player) => {
+  room.kickPlayer(player.id, 'Good Bye!', false);
 };
 
 room.onCommand_pm = (fromPlayer, args) => {
@@ -30,7 +30,7 @@ room.onCommand_pm = (fromPlayer, args) => {
   }
 
   const id = args[0];
-  const msg = args.slice(1).join(" ");
+  const msg = args.slice(1).join(' ');
 
   let intId = parseInt(id);
 
@@ -73,24 +73,24 @@ room.onCommand_pm = (fromPlayer, args) => {
   return false;
 };
 
-room.onCommand_swap = player => {
+room.onCommand_swap = (player) => {
   if (player.admin) {
     swapTeams(player);
   } else {
     room.sendAnnouncement(
-      "You need admin to use this command!",
+      'You need admin to use this command!',
       player.id,
       0xff0000
     );
   }
 };
 
-room.onCommand_rr = player => {
+room.onCommand_rr = (player) => {
   if (player.admin) {
     restartGame();
   } else {
     room.sendAnnouncement(
-      "You need admin to use this command!",
+      'You need admin to use this command!',
       player.id,
       0xff0000
     );
@@ -101,24 +101,24 @@ room.onCommand_rr = player => {
 // so it should swap teams and restart.
 let stoppedByRrs = null;
 
-room.onCommand_rrs = player => {
+room.onCommand_rrs = (player) => {
   if (player.admin) {
     stoppedByRrs = player;
     room.stopGame();
   } else {
     room.sendAnnouncement(
-      "You need admin to use this command!",
+      'You need admin to use this command!',
       player.id,
       0xff0000
     );
   }
 };
 
-room.onGameStop = function() {
+room.onGameStop = function () {
   if (stoppedByRrs) {
     swapTeams(stoppedByRrs);
     room.startGame();
-    stoppedByRrsCommand = null;
+    stoppedByRrs = null;
   }
 };
 
@@ -137,10 +137,10 @@ function swapTeams(player) {
         room.setPlayerTeam(players[i].id, 1);
       }
     }
-    room.sendAnnouncement("Teams swapped!", null, 0x00ff00);
+    room.sendAnnouncement('Teams swapped!', null, 0x00ff00);
   } else {
     room.sendAnnouncement(
-      "Game needs to be stopped to swap teams!",
+      'Game needs to be stopped to swap teams!',
       player.id,
       0xff0000
     );
