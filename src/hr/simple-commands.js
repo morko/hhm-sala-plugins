@@ -33,6 +33,11 @@ room.onCommand_pm = (fromPlayer, args) => {
     return false;
   }
 
+  const mutePlugin = room.getPlugin("hr/mute");
+  if (mutePlugin && mutePlugin.isMuted(fromPlayer)) {
+    return false;
+  }
+
   const id = args[0];
   const msg = args.slice(1).join(" ");
 
@@ -74,6 +79,7 @@ room.onCommand_pm = (fromPlayer, args) => {
 
   let pm = `PM ${fromPlayer.name}: ${msg}`;
   room.sendAnnouncement(pm, toPlayer.id, 0xa98abf);
+  room.sendAnnouncement(pm, fromPlayer.id, 0xa98abf);
   return false;
 };
 

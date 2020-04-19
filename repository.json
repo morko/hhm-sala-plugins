@@ -13,6 +13,7 @@
     "hr/kickban",
     "hr/maps",
     "hr/motd",
+    "hr/mute",
     "hr/pause",
     "hr/simple-commands",
     "hr/spam",
