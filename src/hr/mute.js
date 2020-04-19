@@ -9,9 +9,9 @@
  *
  * - !mute #PLAYER_ID
  *   - Mutes player with given id.
- * - !unmute MUTE_NUMBER
+ * - !unmute MUTE_NUMBER or #PLAYER_ID
  * - !mutelist
- *   - Use this to get the MUTE_NUMBER for unmute command.
+ *   - Use this to see muted players and get the MUTE_NUMBER for unmute command.
  * - !clearmutes
  *
  * And exports following functions:
@@ -35,6 +35,9 @@ room.pluginSpec = {
     protectedRoles: ["host", "admin"],
     // Only these roles can use the commands.
     allowedRoles: ["admin", "admin"],
+    // Allow talking when team captain. If this is set to true, the player is
+    // allowed to talk when (s)he is the first player in a team.
+    allowTalkingWhenCaptain: false,
   },
   dependencies: ["sav/players", "sav/roles", "sav/commands"],
   order: {},
@@ -75,24 +78,63 @@ function mutePlayer(player) {
   room.getPlugin("hhm/persistence").persistPluginData(room);
 }
 /**
- * Unmutes the player from the given index in muteMap.
- * Returns the removed player if the index was valid.
+ * Unmutes the player.
  *
- * @param {number} index - Index of the rule to remove.
+ * The argument can be either index of muteMap or a player id prefixed with
+ * #, but if player id is used the player needs to be in the room.
+ *
+ * Returns the removed player if the index or id was valid and player was
+ * unmuted.
+ *
+ * @param {number|string} indexOrPlayerId - Index of the rule to remove.
  * @returns {PlayerObject} - Unmuted player or null if no player was unmuted.
  */
-function removeMute(index) {
+function removeMute(indexOrPlayerId) {
+  if (typeof indexOrPlayerId === "string" && indexOrPlayerId.startsWith("#")) {
+    const removedPlayer = room.getPlayer(parseId(indexOrPlayerId));
+    if (!removedPlayer || !muteMap.has(removedPlayer.conn)) {
+      return null;
+    }
+    muteMap.delete(removedPlayer.conn);
+    room.getPlugin("hhm/persistence").persistPluginData(room);
+    return removedPlayer;
+  }
+
+  const index = +indexOrPlayerId;
+  if (isNaN(index)) return null;
+
   let i = 0;
-  let removedPlayer = null;
   for (let key of muteMap.keys()) {
-    if (i === index) {
-      removedPlayer = muteMap.get(key);
+    if (i === indexOrPlayerId) {
+      const removedPlayer = muteMap.get(key);
       muteMap.delete(key);
       room.getPlugin("hhm/persistence").persistPluginData(room);
       return removedPlayer;
     }
   }
   return null;
+}
+
+/**
+ * Checks if the player is team captain.
+ *
+ * Determines the captain by checking if the player is on top of either
+ * teams list.
+ *
+ * @param {PlayerObject} player - HaxBall PlayerObject.
+ * @returns {boolean} - Is the player team captain.
+ */
+function isPlayerTeamCaptain(player) {
+  const playerList = room.getPlayerList();
+  const redTeamCap = playerList.find((p) => p.team === 1);
+  const blueTeamCap = playerList.find((p) => p.team === 2);
+  if (
+    (redTeamCap && redTeamCap.id === player.id) ||
+    (blueTeamCap && blueTeamCap.id === player.id)
+  ) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -216,12 +258,13 @@ room.onCommand1_mute = {
 room.onCommand1_unmute = {
   function: (byPlayer, [muteNumber]) => {
     if (!isPlayerAllowedToRunCommand(byPlayer)) return;
-    const unmutedPlayer = removeMute(+muteNumber);
+
+    const unmutedPlayer = removeMute(muteNumber);
     if (!unmutedPlayer) {
       room.sendAnnouncement(
-        `Could not remove mute number ${muteNumber}. ` +
-          `Make sure the mute number is correct ` +
-          `(see !mutelist for the numbers).`,
+        `Could not unmute ${muteNumber}! ` +
+          `Make sure the argument is either a number listed ` +
+          `in !mutelist or player ID prefixed with #.`,
         byPlayer.id,
         0xff0000
       );
@@ -244,8 +287,8 @@ room.onCommand1_unmute = {
   data: {
     "sav/help": {
       text:
-        " MUTE_NUMBER (Unmutes player with the mute number. " +
-        "See !mutelist for the numbers)",
+        " MUTE_NUMBER or #PLAYER_ID (Unmutes player. " +
+        "See !mutelist for the numbers or use #PLAYER_ID)",
       roles: room.getConfig("allowedRoles"),
     },
   },
@@ -304,6 +347,12 @@ function isMuted(player) {
 
 function handlePlayerChat(player) {
   if (isMuted(player)) {
+    if (
+      room.getConfig("allowTalkingWhenCaptain") &&
+      isPlayerTeamCaptain(player)
+    ) {
+      return;
+    }
     room.sendAnnouncement(room.getConfig("muteMessage"), player.id, 0xff0000);
     return false;
   }
