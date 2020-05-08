@@ -1,16 +1,16 @@
 /**
  * This Haxball Headless Manager (HHM) plugin provides protection against
- * unwanted banning of players.
+ * unwanted banning and kicking of players.
  * 
- * If player that **is not** protected bans a player that is protected
+ * If player that **is not** protected bans/kicks a player that is protected
  * the banner gets banned/kicked himself and the banned player gets unbanned.
  * 
- * If player that **is** protected bans another protected player
+ * If player that **is** protected bans/kicks another protected player
  * the player does not get banned but the banned player gets unbanned.
  * 
  * If `allowOnlyProtectedRolesToBan` is set to `true`, then the plugin also
- * bans all unprotected players that are trying to ban other players and r
- * removes the ban they were trying to execute.
+ * bans all unprotected players that are trying to ban other players and
+ * removes the ban.
  * 
  * Depends on `sav/roles` plugin of the default HHM plugin repository.
  */
@@ -20,7 +20,7 @@ var room = HBInit();
 room.pluginSpec = {
   name: `hr/ban-protection`,
   author: `salamini`,
-  version: `1.0.0`,
+  version: `1.1.0`,
   config: {
     // Protected roles that cannot be banned.
     protectedRoles: [
@@ -32,9 +32,11 @@ room.pluginSpec = {
     // get kicked / banned if they ban player with protected role.
     allowOnlyProtectedRolesToBan: false,
     // Message to display when kicking / banning.
-    violationMessage: 'You should not have tried to ban that player!',
+    violationMessage: 'Tried to kick or ban a protected player!',
     // If this is `true` the violators will get banned. Otherwise kicked.
-    banTheBanners: false
+    banTheBanners: false,
+    // If this is `true` the protection will also apply for kicking.
+    protectFromKicks: true
   },
   dependencies: [`sav/roles`]
 };
@@ -64,9 +66,8 @@ function isPlayerProtected(playerId) {
 }
 
 function onPlayerKicked(bannedPlayer, reason, ban, byPlayer) {
-  if (!ban) return;
-  if (!byPlayer) return;
-  if (byPlayer.id === 0) return;
+  if (!ban && !room.getConfig('protectFromKicks')) return;
+  if (!byPlayer || byPlayer.id === 0) return;
   
   const violationMessage = room.pluginSpec.config.violationMessage;
   const banTheBanners = room.pluginSpec.config.banTheBanners;
