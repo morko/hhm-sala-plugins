@@ -65,7 +65,7 @@ function isPlayerProtected(playerId) {
   return false;
 }
 
-function onPlayerKicked(bannedPlayer, reason, ban, byPlayer) {
+function onPlayerKicked(kickedPlayer, reason, ban, byPlayer) {
   if (!ban && !room.getConfig('protectFromKicks')) return;
   if (!byPlayer || byPlayer.id === 0) return;
   
@@ -73,17 +73,17 @@ function onPlayerKicked(bannedPlayer, reason, ban, byPlayer) {
   const banTheBanners = room.pluginSpec.config.banTheBanners;
   const allowOnlyProtectedRolesToBan = room.pluginSpec.config.allowOnlyProtectedRolesToBan;
 
-  const bannedIsProtected = isPlayerProtected(bannedPlayer.id);
-  const bannerIsProtected = isPlayerProtected(byPlayer.id);
+  const kickedIsProtected = isPlayerProtected(kickedPlayer.id);
+  const kickerIsProtected = isPlayerProtected(byPlayer.id);
 
-  if (bannedIsProtected) {
-    room.clearBan(bannedPlayer.id);
-    if (!bannerIsProtected) {
+  if (kickedIsProtected) {
+    room.clearBan(kickedPlayer.id);
+    if (!kickerIsProtected) {
       room.kickPlayer(byPlayer.id, violationMessage, banTheBanners);
     }
-  } else if (allowOnlyProtectedRolesToBan && !bannerIsProtected) {
+  } else if (ban && allowOnlyProtectedRolesToBan && !kickerIsProtected) {
     room.kickPlayer(byPlayer.id, violationMessage, banTheBanners);
-    room.clearBan(bannedPlayer.id);
+    room.clearBan(kickedPlayer.id);
   }
 }
 
