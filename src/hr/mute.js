@@ -26,7 +26,7 @@ let room = HBInit();
 room.pluginSpec = {
   name: "hr/mute",
   author: "salamini",
-  version: "1.0.0",
+  version: "1.0.1",
   config: {
     // This message will be sent to muted players when they try to write
     // something.
@@ -111,6 +111,7 @@ function removeMute(indexOrPlayerId) {
       room.getPlugin("hhm/persistence").persistPluginData(room);
       return removedPlayer;
     }
+    i++;
   }
   return null;
 }
