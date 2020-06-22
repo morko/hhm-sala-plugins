@@ -91,16 +91,30 @@ const DEFAULT_MAPS = [
   'Huge'
 ];
 
-room.onCommand_maps = player => {
-  if (!isAdmin(player)) return;
-  displayMaps(player.id);
+room.onCommand_maps = {
+  function: player => {
+    if (!isAdmin(player)) return;
+    displayMaps(player.id);
+  },
+  data: {
+    'sav/help': {
+      text: ' (list all enabled maps)'
+    }
+  }
 };
 
-room.onCommand_setMap = (player, args) => {
-  if (!isAdmin(player)) return;
-  let mapName = args.join(' ');
-  if (!setMap(mapName)) {
-    room.sendAnnouncement('Map not found.', player.id, 0xff0000);
+room.onCommand_setMap = {
+  function: (player, args) => {
+    if (!isAdmin(player)) return;
+    let mapName = args.join(' ');
+    if (!setMap(mapName)) {
+      room.sendAnnouncement('Map not found.', player.id, 0xff0000);
+    }
+  },
+  data: {
+    'sav/help': {
+      text: ` MAP_NAME (changes the map)`,
+    }
   }
 };
 
@@ -187,12 +201,6 @@ function sanitizeMapNames() {
 
 room.onRoomLink = () => {
   sanitizeMapNames();
-
-  let help = room.getPlugin(`sav/help`);
-  if (help) {
-    help.registerHelp(`maps`, ` (lists all enabled maps)`);
-    help.registerHelp(`setmap`, ` MAP_NAME (changes the map)`);
-  }
 };
 
 room.setMap = setMap;

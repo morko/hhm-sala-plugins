@@ -127,78 +127,111 @@ function fallBackToPreviousMap(byPlayer) {
   }
 }
 
-room.onCommand_mapsAvailable = player => {
-  const rolesPlugin = room.getPlugin('sav/roles');
-  const allowedRoles = room.getConfig('allowedRoles');
-  if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
-    return false;
-  }
-  let mapsPlugin = room.getPlugin('hr/maps');
-  if (mapsPlugin) {
-    mapsPlugin.displayMaps(player.id, true);
-  } else {
-    let output = 'Maps:\n';
-    for (let map of DEFAULT_MAPS) {
-      output += `${map}, `;
+room.onCommand_mapsAvailable = { 
+  function: player => {
+    const rolesPlugin = room.getPlugin('sav/roles');
+    const allowedRoles = room.getConfig('allowedRoles');
+    if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
+      return false;
     }
-    output = output.slice(0, -2);
-    room.sendAnnouncement(output, id, 0xdf9eff);
+    let mapsPlugin = room.getPlugin('hr/maps');
+    if (mapsPlugin) {
+      mapsPlugin.displayMaps(player.id, true);
+    } else {
+      let output = 'Maps:\n';
+      for (let map of DEFAULT_MAPS) {
+        output += `${map}, `;
+      }
+      output = output.slice(0, -2);
+      room.sendAnnouncement(output, id, 0xdf9eff);
+    }
+  },
+  data: {
+    'sav/help': {
+      text: ' (display available maps)',
+      allowedRoles: room.getConfig('allowedRoles')
+    }
   }
-};
+}
 
-room.onCommand_enableAllMaps = (player, [mapName]) => {
-  const rolesPlugin = room.getPlugin('sav/roles');
-  const allowedRoles = room.getConfig('allowedRoles');
-  if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
-    return false;
+room.onCommand_enableAllMaps = {
+  function: (player, [mapName]) => {
+    const rolesPlugin = room.getPlugin('sav/roles');
+    const allowedRoles = room.getConfig('allowedRoles');
+    if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
+      return false;
+    }
+    room.sendAnnouncement(`All maps allowed.`, player.id, 0xcccccc);
+    room.setConfig('enabledMaps', [mapName, ...enabledMaps]);
+  },
+  data: {
+    'sav/help': {
+      text: ' (allow all maps)',
+      allowedRoles: room.getConfig('allowedRoles')
+    }
   }
-  room.sendAnnouncement(`All maps allowed.`, player.id, 0xcccccc);
-  room.setConfig('enabledMaps', [mapName, ...enabledMaps]);
-};
+}
 
-room.onCommand_enableMap = (player, [mapName]) => {
-  const rolesPlugin = room.getPlugin('sav/roles');
-  const allowedRoles = room.getConfig('allowedRoles');
-  if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
-    return false;
+room.onCommand_enableMap = { 
+  function: (player, [mapName]) => {
+    const rolesPlugin = room.getPlugin('sav/roles');
+    const allowedRoles = room.getConfig('allowedRoles');
+    if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
+      return false;
+    }
+    if (enableMap(mapName)) {
+      room.sendAnnouncement(
+        `Map ${mapName} was added to allowed maps.`,
+        player.id,
+        0xcccccc
+      );
+    } else {
+      room.sendAnnouncement(
+        `Could not enable ${mapName}. ` +
+          `Use !mapsAvailable to see maps and make sure its not already enabled`,
+        player.id,
+        0xcc0000
+      );
+    }
+  },
+  data: {
+    'sav/help': {
+      text: ' MAP_NAME (adds given map to allowed maps)',
+      allowedRoles: room.getConfig('allowedRoles')
+    }
   }
-  if (enableMap(mapName)) {
-    room.sendAnnouncement(
-      `Map ${mapName} was added to allowed maps.`,
-      player.id,
-      0xcccccc
-    );
-  } else {
-    room.sendAnnouncement(
-      `Could not enable ${mapName}. ` +
-        `Use !mapsAvailable to see maps and make sure its not already enabled`,
-      player.id,
-      0xcc0000
-    );
-  }
-};
+}
 
-room.onCommand_disableMap = (player, [mapName]) => {
-  const rolesPlugin = room.getPlugin('sav/roles');
-  const allowedRoles = room.getConfig('allowedRoles');
-  if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
-    return false;
+room.onCommand_disableMap = {
+  function: (player, [mapName]) => {
+    const rolesPlugin = room.getPlugin('sav/roles');
+    const allowedRoles = room.getConfig('allowedRoles');
+    if (!rolesPlugin.ensurePlayerRoles(player.id, allowedRoles, room)) {
+      return false;
+    }
+    if (disableMap(mapName)) {
+      room.sendAnnouncement(
+        `Map ${mapName} was removed from allowed maps.`,
+        player.id,
+        0xcccccc
+      );
+    } else {
+      room.sendAnnouncement(
+        `Could not disable ${mapName}. ` +
+          `Make sure the map is allowed and its not the last enabled map. `,
+        player.id,
+        0xcc0000
+      );
+    }
+  },
+  data: {
+    'sav/help': {
+      text: ' MAP_NAME (removes given map from allowed maps)',
+      allowedRoles: room.getConfig('allowedRoles')
+    }
   }
-  if (disableMap(mapName)) {
-    room.sendAnnouncement(
-      `Map ${mapName} was removed from allowed maps.`,
-      player.id,
-      0xcccccc
-    );
-  } else {
-    room.sendAnnouncement(
-      `Could not disable ${mapName}. ` +
-        `Make sure the map is allowed and its not the last enabled map. `,
-      player.id,
-      0xcc0000
-    );
-  }
-};
+}
+
 /**
  * Enables the given map.
  * @param {string} [mapName] - Map name to enable. Has to be a default map
@@ -306,25 +339,6 @@ room.onRoomLink = function onRoomLink() {
   room.setTeamsLock(room.getConfig('lockTeams'));
   room.setTimeLimit(room.getConfig('timeLimit'));
   room.setScoreLimit(room.getConfig('scoreLimit'));
-  let help = room.getPlugin(`sav/help`);
-  if (help) {
-    help.registerHelp(`enableAllMaps`, ` (allows all maps)`, {
-      roles: room.getConfig('allowedRoles')
-    });
-    help.registerHelp(`mapsAvailable`, ` (displays all available maps)`, {
-      roles: room.getConfig('allowedRoles')
-    });
-    help.registerHelp(`enableMap`, ` MAP_NAME (adds the map to allowed maps)`, {
-      roles: room.getConfig('allowedRoles')
-    });
-    help.registerHelp(
-      `disableMap`,
-      ` MAP_NAME (removes the map from allowed maps)`,
-      {
-        roles: room.getConfig('allowedRoles')
-      }
-    );
-  }
   let initialMap = room.getConfig('defaultMap');
   if (isRestrictingMaps()) {
     if (isEnabledMap(initialMap)) {

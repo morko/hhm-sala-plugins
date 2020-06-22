@@ -75,89 +75,121 @@ function getPlayerWithName(pName) {
   return player;
 }
 
-room.onCommand1_kick = (byPlayer, [pName]) => {
-  let roles = room.getPlugin(`sav/roles`);
-  if (!roles) return;
-  if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
-    return;
-  }
-  let player = getPlayerWithName(pName);
-  if (!player) {
-    room.sendAnnouncement(`No player with name ${pName}.`, byPlayer.id, 0xFF0000);
-    return;
-  }
-  if (!kick(player.id)) {
-    room.sendAnnouncement(`Could not kick player ${pName}.`, byPlayer.id, 0xFF0000);
-    return;
-  }
-}
-
-room.onCommand1_ban = (byPlayer, [pName]) => {
-  let roles = room.getPlugin(`sav/roles`);
-  if (!roles) return;
-  if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
-    return;
-  }
-  let player = getPlayerWithName(pName);
-  if (!player) {
-    room.sendAnnouncement(`No player with name ${pName}.`, byPlayer.id, 0xFF0000);
-    return;
-  }
-  if (!ban(player.id)) {
-    room.sendAnnouncement(`Could not ban player ${pName}.`, byPlayer.id, 0xFF0000);
-    return;
+room.onCommand1_kick = {
+  function: (byPlayer, [pName]) => {
+    let roles = room.getPlugin(`sav/roles`);
+    if (!roles) return;
+    if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
+      return;
+    }
+    let player = getPlayerWithName(pName);
+    if (!player) {
+      room.sendAnnouncement(`No player with name ${pName}.`, byPlayer.id, 0xFF0000);
+      return;
+    }
+    if (!kick(player.id)) {
+      room.sendAnnouncement(`Could not kick player ${pName}.`, byPlayer.id, 0xFF0000);
+      return;
+    }
+  },
+  data: {
+    'sav/help': {
+      text: ' PLAYER_NAME',
+      allowedRoles 
+    }
   }
 }
 
-room.onCommand0_clearbans = (byPlayer, [playerId]) => {
-  let roles = room.getPlugin(`sav/roles`);
-  if (!roles) return;
-  if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
-    return;
+room.onCommand1_ban = {
+  function: (byPlayer, [pName]) => {
+    let roles = room.getPlugin(`sav/roles`);
+    if (!roles) return;
+    if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
+      return;
+    }
+    let player = getPlayerWithName(pName);
+    if (!player) {
+      room.sendAnnouncement(`No player with name ${pName}.`, byPlayer.id, 0xFF0000);
+      return;
+    }
+    if (!ban(player.id)) {
+      room.sendAnnouncement(`Could not ban player ${pName}.`, byPlayer.id, 0xFF0000);
+      return;
+    }
+  },
+  data: {
+    'sav/help': {
+      text: ' PLAYER_NAME',
+      allowedRoles 
+    }
   }
-  room.clearBans();
-  room.sendAnnouncement(`Bans cleared!`, null, 0x00FF00);
 }
 
-room.onCommand1_unban = (byPlayer, [playerId]) => {
-  let roles = room.getPlugin(`sav/roles`);
-  if (!roles) return;
-  if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
-    return;
-  }
-  if (!unban(playerId)) {
-    room.sendAnnouncement(
-      `Could not remove ban of player with id ${playerId}. `
-      + `Make sure that the id matches one in the banlist.`,
-      byPlayer.id,
-      0xFF0000
-    );
+room.onCommand0_clearbans = {
+  function: (byPlayer, [playerId]) => {
+    let roles = room.getPlugin(`sav/roles`);
+    if (!roles) return;
+    if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
+      return;
+    }
+    room.clearBans();
+    room.sendAnnouncement(`Bans cleared!`, null, 0x00FF00);
+  },
+  data: {
+    'sav/help': {
+      text: ' (removes all the bans in the room)',
+      allowedRoles 
+    }
   }
 }
 
-room.onCommand0_banlist = (byPlayer) => {
-  let roles = room.getPlugin(`sav/roles`);
-  if (!roles) return;
-  if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
-    return;
+room.onCommand1_unban = {
+  function: (byPlayer, [playerId]) => {
+    let roles = room.getPlugin(`sav/roles`);
+    if (!roles) return;
+    if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
+      return;
+    }
+    if (!unban(playerId)) {
+      room.sendAnnouncement(
+        `Could not remove ban of player with id ${playerId}. `
+        + `Make sure that the id matches one in the banlist.`,
+        byPlayer.id,
+        0xFF0000
+      );
+    }
+  },
+  data: {
+    'sav/help': {
+      text: ' PLAYER_ID (see PLAYER_ID from !banlist)',
+      allowedRoles 
+    }
   }
-  let bPlayers = bannedPlayers();
-  if (bPlayers.length === 0) {
-    room.sendAnnouncement('No banned players.', byPlayer.id, 0xFF0000);
-    return;
-  }
-  let bpList = bPlayers.map((p) =>`id:${p.id} - ${p.name}`)
-  const utils = room.getPlugin('hr/utils');
-  utils.sendLongAnnouncement(bpList.join('\n'), byPlayer.id, 0x00FF00);
 }
 
-let help = room.getPlugin(`sav/help`);
-if (help) {
-  help.registerHelp(`banlist`, ``, {numArgs: 0, roles: allowedRoles});
-  help.registerHelp(`clearbans`, ``, {numArgs: 0, roles: allowedRoles});
-  help.registerHelp(`kick`, ` PLAYER_NAME`, {numArgs: 1, roles: allowedRoles});
-  help.registerHelp(`ban`, ` PLAYER_NAME`, {numArgs: 1, roles: allowedRoles});
-  help.registerHelp(`unban`, ` PLAYER_ID`, {numArgs: 1, roles: allowedRoles});
+
+room.onCommand0_banlist = {
+  function: (byPlayer) => {
+    let roles = room.getPlugin(`sav/roles`);
+    if (!roles) return;
+    if (!roles.ensurePlayerRoles(byPlayer.id, allowedRoles, room)) {
+      return;
+    }
+    let bPlayers = bannedPlayers();
+    if (bPlayers.length === 0) {
+      room.sendAnnouncement('No banned players.', byPlayer.id, 0xFF0000);
+      return;
+    }
+    let bpList = bPlayers.map((p) =>`id:${p.id} - ${p.name}`)
+    const utils = room.getPlugin('hr/utils');
+    utils.sendLongAnnouncement(bpList.join('\n'), byPlayer.id, 0x00FF00);
+  },
+  data: {
+    'sav/help': {
+      text: ' (displays banned players)',
+      allowedRoles 
+    }
+  }
 }
 
 /**
