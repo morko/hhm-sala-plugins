@@ -39,7 +39,7 @@ room.pluginSpec = {
     // allowed to talk when (s)he is the first player in a team.
     allowTalkingWhenCaptain: false,
   },
-  dependencies: ["sav/players", "sav/roles", "sav/commands"],
+  dependencies: ["sav/players", "sav/roles", "sav/commands", "hr/utils"],
   order: {},
   incompatible_with: [],
 };
@@ -318,7 +318,8 @@ room.onCommand0_mutelist = {
     }
     room.sendAnnouncement("MUTE_NUMBER - PLAYER", byPlayer.id, 0x00ff00);
     const mutelist = [...muteMap.values()].map((p, i) => `${i} - ${p.name}`);
-    room.sendAnnouncement(mutelist.join("\n"), byPlayer.id, 0x00ff00);
+    const utils = room.getPlugin('hr/utils');
+    utils.sendLongAnnouncement(mutelist.join('\n'), byPlayer.id, 0x00FF00);
   },
   data: {
     "sav/help": {

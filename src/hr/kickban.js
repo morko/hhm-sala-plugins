@@ -15,7 +15,7 @@ room.pluginSpec = {
   author: `salamini`,
   version: `1.0.0`,
   config: {},
-  dependencies: [],
+  dependencies: [ 'hr/utils' ],
   order: {},
   incompatible_with: [],
 };
@@ -147,7 +147,8 @@ room.onCommand0_banlist = (byPlayer) => {
     return;
   }
   let bpList = bPlayers.map((p) =>`id:${p.id} - ${p.name}`)
-  room.sendAnnouncement(bpList.join('\n'), byPlayer.id, 0x00FF00);
+  const utils = room.getPlugin('hr/utils');
+  utils.sendLongAnnouncement(bpList.join('\n'), byPlayer.id, 0x00FF00);
 }
 
 let help = room.getPlugin(`sav/help`);
